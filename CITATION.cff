@@ -1,0 +1,78 @@
+# Read by GitHub ("Cite this repository") and by Zenodo when a release is archived.
+# Tag the GitHub release v5 so the Zenodo record matches the version below.
+# Before the first public release: check author names and add ORCID iDs.
+# After the Zenodo DOI is issued: add the two lines
+#   doi: "10.5281/zenodo.NNNNNNN"
+#   date-released: "YYYY-MM-DD"
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata below."
+type: software
+title: "Raman peak extractor for graphene nanoribbon spectra"
+version: "5"
+abstract: >-
+  Browser-based program for baseline subtraction, Si calibration and
+  constrained multi-Lorentzian fitting of Raman spectra of graphene
+  nanoribbons, with uncertainties estimated by a Monte Carlo of the
+  full analysis.
+authors:
+  - family-names: Yusufoglu
+    given-names: Muhammed
+    affiliation: "Department of Materials Science and Engineering, University of Arizona"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+  - family-names: Mutlu
+    given-names: Zafer
+    affiliation: "Department of Materials Science and Engineering, University of Arizona"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+repository-code: "https://github.com/zmutlulab/raman-peak-extractor"
+license: MIT
+keywords:
+  - Raman spectroscopy
+  - peak fitting
+  - baseline correction
+  - graphene nanoribbons
+  - Lorentzian
+references:
+  - type: article
+    title: "Electrical and Structural Response of Nine-Atom-Wide Armchair Graphene Nanoribbon Transistors to Gamma Irradiation"
+    authors:
+      - family-names: Yumigeta
+        given-names: Kentaro
+      - family-names: Yusufoglu
+        given-names: Muhammed
+      - family-names: Federice
+        given-names: John G.
+      - family-names: Hughes
+        given-names: Elena T.
+      - family-names: Degirmenci
+        given-names: Ahmet Mert
+      - family-names: Njardarson
+        given-names: Jon T.
+      - family-names: Simmons-Potter
+        given-names: Kelly
+      - family-names: Potter
+        given-names: Barrett G.
+      - family-names: Mutlu
+        given-names: Zafer
+    journal: "ACS Applied Materials & Interfaces"
+    year: 2026
+    volume: 18
+    issue: "17"
+    start: 25103
+    end: 25111
+    doi: "10.1021/acsami.6c02516"
+  - type: article
+    title: "Step-Edge Passivation and Quantitative Raman Mapping of Transfer Quality in Aligned Graphene Nanoribbons"
+    authors:
+      - family-names: Lüthi
+        given-names: Dominik
+      - family-names: Darawish
+        given-names: Rimah
+      - family-names: Müllen
+        given-names: Klaus
+      - family-names: Fasel
+        given-names: Roman
+      - family-names: Borin Barin
+        given-names: Gabriela
+    year: 2026
+    url: "https://arxiv.org/abs/2606.23304"
+    notes: "arXiv preprint arXiv:2606.23304"
