@@ -1,0 +1,1108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Raman peak extractor for graphene nanoribbon spectra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.27.0/plotly.min.js"></script>
+<style>
+:root{
+  --bg:#EEF2F4; --panel:#FFFFFF; --panel2:#F6F8F9; --ink:#17222A; --muted:#5A6873; --line:#D3DADF;
+  --accent:#8E1B3A; --accent-ink:#FFFFFF; --base:#23707A; --maskc:rgba(199,150,38,0.16);
+  --ok:#2C7A4B; --warn:#A35F00; --raw:#6B7780; --comp:rgba(142,27,58,0.35);
+  --g1:#8E1B3A; --g2:#23707A; --g3:#B07A12; --g4:#4B4FA8; --g5:#5A6873; --g6:#2C7A4B;
+  --font:"Instrument Sans", "Segoe UI", system-ui, -apple-system, Helvetica, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F161B; --panel:#172129; --panel2:#1C2831; --ink:#E4EBEF; --muted:#97A6B1; --line:#2A3944;
+    --accent:#E2678A; --accent-ink:#1A0C11; --base:#5DC2CC; --maskc:rgba(230,185,80,0.14);
+    --ok:#6BC58F; --warn:#E3A44B; --raw:#9AA7B0; --comp:rgba(226,103,138,0.4);
+    --g1:#E2678A; --g2:#5DC2CC; --g3:#E3B04B; --g4:#9A9CF0; --g5:#A9B6C0; --g6:#6BC58F;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F161B; --panel:#172129; --panel2:#1C2831; --ink:#E4EBEF; --muted:#97A6B1; --line:#2A3944;
+  --accent:#E2678A; --accent-ink:#1A0C11; --base:#5DC2CC; --maskc:rgba(230,185,80,0.14);
+  --ok:#6BC58F; --warn:#E3A44B; --raw:#9AA7B0; --comp:rgba(226,103,138,0.4);
+  --g1:#E2678A; --g2:#5DC2CC; --g3:#E3B04B; --g4:#9A9CF0; --g5:#A9B6C0; --g6:#6BC58F;
+}
+:root{ box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+*,*::before,*::after{ box-sizing:inherit; }
+html{ scroll-padding-top:env(safe-area-inset-top,0px); }
+body{ margin:0; background:var(--bg); color:var(--ink); font-family:var(--font); font-size:15px; line-height:1.45; }
+header{ padding:22px 24px 14px; max-width:1560px; margin:0 auto; }
+header h1{ margin:0; font-size:26px; font-weight:700; letter-spacing:-0.01em; }
+header p{ margin:4px 0 0; color:var(--muted); max-width:78ch; }
+.layout{ display:grid; grid-template-columns:minmax(340px,450px) minmax(0,1fr); gap:18px; padding:0 24px 32px; max-width:1560px; margin:0 auto; }
+@media (max-width:900px){ .layout{ grid-template-columns:1fr; padding:0 12px 24px; } header{ padding:16px 12px 10px; } }
+aside, main{ min-width:0; }
+.panel{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:14px; }
+.panel h2{ margin:0 0 10px; font-size:16px; font-weight:650; display:flex; align-items:baseline; gap:8px; }
+.panel h2 .n{ color:var(--accent); font-weight:700; }
+.panel h3{ margin:14px 0 6px; font-size:14px; font-weight:650; }
+.hint{ color:var(--muted); font-size:13px; margin:4px 0 8px; }
+.drop{ border:1.5px dashed var(--line); border-radius:8px; padding:18px 12px; text-align:center; cursor:pointer; background:var(--panel2); }
+.drop.over{ border-color:var(--accent); }
+.drop strong{ display:block; font-weight:600; }
+.drop span{ color:var(--muted); font-size:13px; }
+button{ font:inherit; cursor:pointer; border-radius:7px; border:1px solid var(--line); background:var(--panel2); color:var(--ink); padding:7px 12px; }
+button:hover{ border-color:var(--muted); }
+button.primary{ background:var(--accent); color:var(--accent-ink); border-color:var(--accent); font-weight:600; width:100%; padding:11px; font-size:15px; }
+button.primary:disabled{ opacity:0.5; cursor:not-allowed; }
+button.link{ border:none; background:none; color:var(--accent); padding:4px 0; text-decoration:underline; }
+button:focus-visible, input:focus-visible, select:focus-visible, summary:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+input, select{ font:inherit; font-size:14px; color:var(--ink); background:var(--panel); border:1px solid var(--line); border-radius:6px; padding:5px 7px; width:100%; }
+input[type=checkbox], input[type=radio]{ width:auto; }
+.row{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.grid2{ display:grid; grid-template-columns:1fr 1fr; gap:8px 10px; }
+label.f{ display:flex; flex-direction:column; gap:3px; font-size:13px; color:var(--muted); }
+label.c{ display:flex; gap:8px; align-items:center; font-size:14px; }
+details{ border-top:1px solid var(--line); padding-top:10px; margin-top:10px; }
+details summary{ cursor:pointer; font-weight:600; font-size:14px; }
+details .grid2{ margin-top:10px; }
+.tablewrap{ overflow-x:auto; border:1px solid var(--line); border-radius:8px; }
+table{ border-collapse:collapse; width:100%; font-size:13px; font-variant-numeric:tabular-nums; }
+th, td{ padding:6px 8px; text-align:left; border-bottom:1px solid var(--line); white-space:nowrap; }
+th{ background:var(--panel2); font-weight:600; }
+tr:last-child td{ border-bottom:none; }
+td.num, th.num{ text-align:right; }
+th.block{ text-align:center; border-left:1px solid var(--line); }
+td.bl, th.bl{ border-left:1px solid var(--line); }
+.files td input{ padding:3px 5px; font-size:13px; }
+.peaks input{ padding:4px 6px; }
+.peaks td{ padding:4px 5px; }
+.tag{ display:inline-block; font-size:12px; padding:1px 7px; border-radius:20px; border:1px solid var(--line); color:var(--muted); }
+.tag.ok{ color:var(--ok); border-color:var(--ok); }
+.tag.warn{ color:var(--warn); border-color:var(--warn); }
+.viewerbar{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px; }
+.viewerbar > select{ flex:1 1 220px; width:auto; }
+.seg{ display:inline-flex; border:1px solid var(--line); border-radius:7px; overflow:hidden; }
+.seg button{ border:none; border-radius:0; background:var(--panel); }
+.seg button[aria-pressed="true"]{ background:var(--accent); color:var(--accent-ink); }
+#plot, #ovplot{ width:100%; height:560px; }
+@media (max-width:600px){ #plot, #ovplot{ height:470px; } }
+.empty{ padding:60px 20px; text-align:center; color:var(--muted); }
+.empty strong{ display:block; color:var(--ink); font-size:17px; margin-bottom:6px; }
+.progress{ height:5px; background:var(--panel2); border-radius:4px; overflow:hidden; margin-top:10px; display:none; }
+.progress div{ height:100%; width:0; background:var(--accent); transition:width .15s; }
+.status{ font-size:13px; color:var(--muted); margin-top:8px; min-height:1.2em; }
+.exports{ display:flex; flex-wrap:wrap; gap:8px; }
+.log{ font-size:13px; color:var(--muted); margin-top:8px; }
+.notes{ font-size:13.5px; color:var(--ink); }
+.notes p{ margin:6px 0; max-width:82ch; }
+.notes ol{ margin:6px 0; padding-left:20px; max-width:82ch; }
+.notes a{ color:var(--accent); }
+.modal{ position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; padding:16px; z-index:10; }
+.modal.open{ display:flex; }
+.modal .box{ background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:16px; width:min(900px,100%); max-height:90%; display:flex; flex-direction:column; gap:10px; }
+.modal textarea{ width:100%; flex:1; min-height:300px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12px; background:var(--panel2); color:var(--ink); border:1px solid var(--line); border-radius:6px; padding:8px; }
+.toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(18px + env(safe-area-inset-bottom,0px)); background:var(--ink); color:var(--bg); padding:8px 14px; border-radius:8px; font-size:14px; display:none; z-index:11; }
+.peakdel{ border:none; background:none; color:var(--muted); padding:2px 6px; }
+.ratiorow{ display:grid; grid-template-columns:1fr auto 1fr auto; gap:6px; align-items:center; margin-top:6px; }
+.modehelp{ font-size:13px; color:var(--muted); margin:6px 0 0; }
+@media (prefers-reduced-motion: reduce){ *{ transition:none !important; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Raman peak extractor for graphene nanoribbon spectra</h1>
+  <p>Baseline subtraction, Si calibration and multi-Lorentzian fitting with standard errors. Everything runs in your browser and your files are not uploaded anywhere.</p>
+</header>
+
+<div class="layout">
+<aside>
+  <section class="panel">
+    <h2><span class="n">1</span> Load spectra</h2>
+    <div class="drop" id="drop" tabindex="0" role="button" aria-label="Choose Raman files">
+      <strong>Drop CSV or TXT files here</strong>
+      <span>or click to choose. Add as many files as you like, for example one per device or per condition.</span>
+    </div>
+    <input type="file" id="fileInput" multiple accept=".csv,.txt,.tsv,.dat,.asc" hidden>
+    <label class="f" style="margin-top:8px">Spectra are stored in
+      <select id="orient">
+        <option value="auto">Detect automatically</option>
+        <option value="cols">Columns (first column is Raman shift)</option>
+        <option value="rows">Rows (first row is Raman shift)</option>
+      </select>
+    </label>
+    <button class="link" id="demoBtn" type="button">Try with simulated example data</button>
+    <div id="fileTableWrap" style="display:none;margin-top:8px">
+      <p class="hint">Group is how spectra are compared and summarized (for example As-fabricated and After irradiation). Power and time normalize intensity.</p>
+      <div class="tablewrap"><table class="files"><thead><tr><th>File</th><th>Spectra</th><th>Group</th><th>mW</th><th>s</th><th></th></tr></thead><tbody id="fileRows"></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2><span class="n">2</span> Peak model</h2>
+    <label class="f">Fitting approach
+      <select id="fitMode">
+        <option value="fixed">Fixed model: fit every peak in the list (Yumigeta et al.)</option>
+        <option value="adaptive">Adaptive: auto-detect and drop weak peaks (Empa)</option>
+      </select>
+    </label>
+    <p class="modehelp" id="modeHelp"></p>
+    <label class="c" style="margin-top:8px" id="regionFitWrap"><input type="checkbox" id="regionFit" checked> Fit by spectral region (RBLM, Si, CH/D, G) with a local background</label>
+    <div class="tablewrap" style="margin-top:8px"><table class="peaks"><thead><tr><th>Name</th><th>Start (cm⁻¹)</th><th>±</th><th>FWHM min</th><th>FWHM max</th><th></th></tr></thead><tbody id="peakRows"></tbody></table></div>
+    <p class="hint">± is how far the peak may move from its start. FWHM limits stop a peak from widening to absorb background or a neighbor. A flag at a limit means the data want something the model does not allow.</p>
+    <div class="row" style="margin-top:8px"><button type="button" id="addPeak">Add peak</button><button type="button" id="resetPeaks">Validated model (transferred 9-AGNR)</button><button type="button" id="yumigetaPeaks">8-peak model (Yumigeta et al.)</button></div>
+    <h3>Intensity ratios</h3>
+    <div id="ratioRows"></div>
+    <div class="row" style="margin-top:8px;justify-content:space-between">
+      <button type="button" id="addRatio">Add ratio</button>
+      <label class="f" style="width:auto">Ratios from
+        <select id="ratioBasis" style="width:auto"><option value="area">Integrated area</option><option value="height">Fitted height</option><option value="bandmax">Band maximum (no peak model)</option></select>
+      </label>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2><span class="n">3</span> Calibration and settings</h2>
+    <label class="c"><input type="checkbox" id="siOn" checked> Shift each spectrum so the Si peak sits at</label>
+    <div class="grid2" style="margin-top:6px">
+      <label class="f">Si reference (cm⁻¹)<input type="number" id="siRef" value="520.5" step="0.1"></label>
+      <label class="f">Search window (± cm⁻¹)<input type="number" id="siWin" value="15"></label>
+    </div>
+    <label class="c" style="margin-top:10px"><input type="checkbox" id="normOn" checked> Normalize intensities (updates instantly)</label>
+    <div class="grid2" style="margin-top:6px">
+      <label class="f">To<select id="normMode"><option value="max">band maximum in the spectrum</option><option value="fit">fitted peak height</option></select></label>
+      <label class="f">of<select id="normPeak" aria-label="Normalization peak"></select></label>
+    </div>
+    <div class="grid2" style="margin-top:10px">
+      <label class="f">Analysis range from (cm⁻¹)<input type="number" id="rangeMin" placeholder="auto"></label>
+      <label class="f">to (cm⁻¹)<input type="number" id="rangeMax" placeholder="auto"></label>
+    </div>
+    <label class="f" style="margin-top:10px">Uncertainties
+      <select id="mcN"><option value="0">From the fit covariance (fast)</option><option value="25" selected>Monte Carlo, 25 replicas (for publication)</option><option value="50">Monte Carlo, 50 replicas</option><option value="100">Monte Carlo, 100 replicas (slow)</option></select>
+    </label>
+    <p class="hint">Monte Carlo reruns the whole pipeline on noisy copies of each fitted spectrum, so baseline and peak-overlap uncertainty are included. Covariance errors can be 1 to 3 times too small for overlapping peaks.</p>
+    <details>
+      <summary>Preprocessing</summary>
+      <div class="grid2">
+        <label class="c" style="grid-column:1/-1"><input type="checkbox" id="despikeOn" checked> Remove cosmic-ray spikes</label>
+        <label class="f">Spike threshold (×σ)<input type="number" id="spikeThr" value="6" step="0.5"></label>
+        <label class="f">Bad CCD pixels (cm⁻¹ list)<input type="text" id="badPix" placeholder="none"></label>
+        <label class="c" style="grid-column:1/-1"><input type="checkbox" id="sgOn"> Savitzky-Golay smoothing</label>
+        <label class="f">SG window (odd points)<input type="number" id="sgWin" value="11" step="2" min="5"></label>
+        <label class="f">SG order<input type="number" id="sgOrd" value="3" min="1" max="5"></label>
+      </div>
+      <p class="hint">Smoothing correlates neighboring points, which makes the reported standard errors too small. Leave it off when you report errors.</p>
+    </details>
+    <details>
+      <summary>Baseline</summary>
+      <div class="grid2">
+        <label class="f">Envelope window (cm⁻¹)<input type="number" id="blWin" value="80"></label>
+        <label class="f">Peak mask threshold (×σ)<input type="number" id="maskK" value="3" step="0.5"></label>
+        <label class="f">Min peak width (cm⁻¹)<input type="number" id="minPW" value="5"></label>
+        <label class="f">Mask margin (cm⁻¹)<input type="number" id="maskMargin" value="12"></label>
+        <label class="f">Anchor spacing (cm⁻¹)<input type="number" id="anchorSp" value="20"></label>
+        <label class="f">Shift below signal (×σ)<input type="number" id="blShift" value="0.5" step="0.1"></label>
+        <label class="c" style="grid-column:1/-1"><input type="checkbox" id="blRefine" checked> Refine the background together with the fit, so Lorentzian tails stay in the peaks</label>
+        <label class="f">Background knot spacing (cm⁻¹)<input type="number" id="refineWin" value="150"></label>
+      </div>
+    </details>
+    <details>
+      <summary>Fitting</summary>
+      <div class="grid2">
+        <label class="f">Local background in each region<select id="regionPoly"><option value="0">Constant</option><option value="1" selected>Linear</option><option value="2">Quadratic</option><option value="3">Cubic</option></select></label>
+        <label class="f">Before region fits<select id="blMode"><option value="adaptive">Subtract adaptive baseline first</option><option value="local">Only local background (Origin style)</option></select></label>
+        <label class="f">Region margin (cm⁻¹)<input type="number" id="regionPad" value="80"></label>
+        <label class="f">Join peaks closer than (cm⁻¹)<input type="number" id="regionGap" value="150"></label>
+        <label class="f">Starting guesses per region<input type="number" id="nStarts" value="8" min="1" max="30"></label>
+        <label class="f">FWHM min (cm⁻¹)<input type="number" id="wMin" value="2"></label>
+        <label class="f">FWHM max (cm⁻¹)<input type="number" id="wMax" value="80"></label>
+        <label class="f">Default ± position (cm⁻¹)<input type="number" id="posTol" value="10"></label>
+        <label class="f">Detection threshold (×σ)<input type="number" id="detK" value="3" step="0.5"></label>
+        <label class="f">Max extra peaks<input type="number" id="maxPk" value="20"></label>
+        <label class="c" style="grid-column:1/-1"><input type="checkbox" id="extraOn"> Whole-spectrum fixed model: also add unlisted peaks found automatically</label>
+        <label class="c" style="grid-column:1/-1"><input type="checkbox" id="offsetOn" checked> Fit a constant offset</label>
+      </div>
+    </details>
+  </section>
+
+  <section class="panel">
+    <h2><span class="n">4</span> Run</h2>
+    <button class="primary" id="runBtn" type="button" disabled>Process all spectra</button>
+    <div class="progress" id="prog"><div></div></div>
+    <div class="status" id="status">Load spectra to begin.</div>
+  </section>
+</aside>
+
+<main>
+  <section class="panel">
+    <h2>Spectra</h2>
+    <div id="viewerEmpty" class="empty"><strong>No results yet</strong>Load your files, check the peak model, then process. Each spectrum appears here with its baseline and every fitted peak.</div>
+    <div id="viewer" style="display:none">
+      <div class="viewerbar">
+        <div class="seg" role="group" aria-label="View">
+          <button type="button" id="vSingle" aria-pressed="true">One spectrum</button>
+          <button type="button" id="vOverlay" aria-pressed="false">Overlay</button>
+        </div>
+      </div>
+      <div id="singleView">
+        <div class="viewerbar">
+          <button type="button" id="prevBtn" aria-label="Previous spectrum">Previous</button>
+          <select id="specSel" aria-label="Choose spectrum"></select>
+          <button type="button" id="nextBtn" aria-label="Next spectrum">Next</button>
+        </div>
+        <div id="plot"></div>
+        <label class="c" style="margin-top:6px"><input type="checkbox" id="showResid" checked> Show fit residual below the corrected spectrum</label>
+        <div class="tablewrap" style="margin-top:10px"><table><thead><tr><th>Peak</th><th class="num">Position (cm⁻¹)</th><th class="num">FWHM (cm⁻¹)</th><th class="num">Height</th><th class="num">Area</th><th>Note</th></tr></thead><tbody id="specPeaks"></tbody></table></div>
+        <div class="log" id="specLog"></div>
+      </div>
+      <div id="overlayView" style="display:none">
+        <div class="viewerbar">
+          <label class="f" style="flex:1 1 200px">Groups shown<select id="ovGroup"></select></label>
+          <label class="c"><input type="checkbox" id="ovInd" checked> Show individual spectra</label>
+        </div>
+        <div id="ovplot"></div>
+        <p class="hint">Baseline-corrected spectra scaled to the height of the normalization peak. Thick lines are group averages, thin lines are individual spectra.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="cmpPanel" style="display:none">
+    <h2>Comparison table</h2>
+    <p class="hint">Fitted parameters for each spectrum. Uncertainties (one standard deviation) are given in parentheses in the last digits, so 311.654(69) means 311.654 ± 0.069. They come from the Monte Carlo when it is switched on.</p>
+    <div class="row" style="margin-bottom:8px">
+      <label class="f" style="flex:1 1 200px">Spectra in the table<select id="cmpGroup"></select></label>
+      <label class="c"><input type="checkbox" id="cmpHeight"> Include height</label>
+    </div>
+    <div class="tablewrap"><table id="cmpTable"></table></div>
+    <h3>Intensity ratios</h3>
+    <div class="tablewrap"><table id="ratioTable"></table></div>
+    <div class="exports" style="margin-top:12px">
+      <button type="button" id="copyCmp">Copy table for Word or Excel</button>
+      <button type="button" id="expCmp">Save comparison (CSV)</button>
+    </div>
+  </section>
+
+  <section class="panel" id="summaryPanel" style="display:none">
+    <h2>Group summary</h2>
+    <p class="hint">Mean ± standard deviation across the spectra in each group.</p>
+    <div class="tablewrap"><table id="summaryTable"></table></div>
+  </section>
+
+  <section class="panel" id="resultsPanel" style="display:none">
+    <h2>Fit quality and files</h2>
+    <div class="tablewrap" style="max-height:420px;overflow:auto"><table id="resultsTable"></table></div>
+    <div class="exports" style="margin-top:12px">
+      <button type="button" id="expPk">Save all peak parameters (CSV)</button>
+      <button type="button" id="expRat">Save ratios and fit quality (CSV)</button>
+      <button type="button" id="expSum">Save group summary (CSV)</button>
+      <button type="button" id="expSpec">Save corrected spectra (CSV)</button>
+      <button type="button" id="expMeth">Save methods and settings (MD)</button>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>How the analysis works</h2>
+    <div class="notes">
+      <ol>
+        <li>Intensity is divided by laser power × integration time. Bad CCD pixels and 1 to 2 pixel cosmic-ray spikes are replaced, keeping narrow real peaks such as Si.</li>
+        <li>Si calibration fits a Lorentzian plus a linear background to the Si peak and shifts the whole Raman shift axis so Si lands on the reference value. Every spectrum then shares the same calibration.</li>
+        <li>A noise-aware adaptive baseline is subtracted, following the Empa procedure (Lüthi et al.): structured peaks are masked, anchors are taken from background regions, anchors that sit above the baseline are removed, and the baseline is shifted slightly below the signal. Because Lorentzian tails reach far from each peak, a smooth spline background is then fitted together with all peaks, so tails are not absorbed into the baseline and the background uncertainty enters the error bars.</li>
+        <li>The fixed model fits every listed peak, including small shoulders such as 7-LA/6-LO (b), 8-iTO and the G-like modes, as in Yumigeta et al. By default the spectrum is split into regions (RBLM, Si, CH/D, G) and each region is fitted with all its peaks plus a local linear background, from several starting guesses, keeping the best. Each peak stays within its ± window and FWHM range. The adaptive model instead adds peaks it detects and removes weak, nested or limit-bound ones, as in the Empa workflow.</li>
+        <li>Fitting uses a global grid search followed by Levenberg-Marquardt refinement of all peaks together. The fitting engine was checked against SciPy's least_squares on 243 parameters from 9 real spectra, agreeing to better than 0.02%.</li>
+        <li>Uncertainties come either from the fit covariance or, by default, from a Monte Carlo of the whole pipeline: noise matching each spectrum is added to its fitted model, the full analysis is repeated, and the spread of each result is reported. This includes baseline and peak-overlap uncertainty that the covariance misses.</li>
+        <li>Normalization divides spectra, heights and areas by the G band maximum (as in Fig. 2a of Yumigeta et al.) or by a fitted peak height. It updates instantly and leaves ratios unchanged.</li>
+      </ol>
+      <p>Numeric settings are our choices and are written into the methods file so they can be reported.</p>
+      <p>Methods implemented: the adaptive baseline and adaptive refitting follow Lüthi et al., <a href="https://arxiv.org/abs/2606.23304">arXiv:2606.23304</a> (2026); the peak model and regional fitting follow Yumigeta et al., ACS Appl. Mater. Interfaces 18 (2026) 25103–25111, <a href="https://doi.org/10.1021/acsami.6c02516">doi:10.1021/acsami.6c02516</a>.</p>
+      <p class="hint">Raman peak extractor for graphene nanoribbon spectra, v<span id="appVersion"></span>. Source code and how to cite: <a href="https://github.com/zmutlulab/raman-peak-extractor">github.com/zmutlulab/raman-peak-extractor</a>.</p>
+    </div>
+  </section>
+</main>
+</div>
+
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="box">
+    <div class="row" style="justify-content:space-between"><strong id="modalTitle">File contents</strong><button type="button" id="modalClose">Close</button></div>
+    <p class="hint" style="margin:0" id="modalHint">Copy the text below and paste it where you need it.</p>
+    <textarea id="modalText" readonly></textarea>
+    <button type="button" id="modalCopy">Copy to clipboard</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+"use strict";
+/* Raman peak extractor for graphene nanoribbon spectra. Released under the MIT License; see LICENSE and README in the repository. */
+const APP_VERSION="5";
+/* ---------------- state ---------------- */
+/* validated model for transferred 9-AGNRs (BIC model selection on 9 devices, checked against SciPy) */
+const DEFAULT_PEAKS=[
+  {name:"RBLM",pos:311.7,tol:10,wmin:8,wmax:30},{name:"Si",pos:520.5,tol:6,wmin:2,wmax:10},
+  {name:"7-LA/6-LO (a)",pos:1233.5,tol:10,wmin:15,wmax:55},{name:"7-LA/6-LO (b)",pos:1255,tol:10,wmin:15,wmax:80},
+  {name:"D broad",pos:1305,tol:30,wmin:10,wmax:150},{name:"6-iTO (D)",pos:1335.2,tol:10,wmin:8,wmax:45},
+  {name:"8-iTO",pos:1386.5,tol:20,wmin:10,wmax:100},{name:"G broad",pos:1588,tol:15,wmin:20,wmax:80},{name:"G1",pos:1597,tol:6,wmin:6,wmax:30}];
+/* the 8-peak model of Yumigeta et al. (as-grown and irradiated devices) */
+const YUMIGETA_PEAKS=[
+  {name:"RBLM",pos:311.7,tol:10,wmin:8,wmax:30},{name:"Si",pos:520.5,tol:6,wmin:2,wmax:10},
+  {name:"7-LA/6-LO (a)",pos:1233.5,tol:10,wmin:15,wmax:55},{name:"7-LA/6-LO (b)",pos:1255,tol:10,wmin:15,wmax:60},
+  {name:"6-iTO (D)",pos:1335.2,tol:10,wmin:8,wmax:45},{name:"8-iTO",pos:1386.5,tol:15,wmin:10,wmax:60},
+  {name:"G-like (low)",pos:1557,tol:10,wmin:10,wmax:50},{name:"G-like (shoulder)",pos:1584,tol:8,wmin:8,wmax:35},{name:"G1",pos:1597,tol:6,wmin:6,wmax:30}];
+const DEFAULT_RATIOS=[{num:"6-iTO (D)",den:"G1",label:"I_D/I_G"},{num:"RBLM",den:"G1",label:"I_RBLM/I_G"}];
+let peaksDef=DEFAULT_PEAKS.map(p=>({...p}));
+let ratios=DEFAULT_RATIOS.map(r=>({...r}));
+let files=[];
+let results=[];
+let current=0;
+let downloads=null;
+let fileSeq=0;
+let view="single";
+const STORE_KEY="gnrRamanSettings_v4";
+
+const $=s=>document.querySelector(s);
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.style.display="block";clearTimeout(toast._t);toast._t=setTimeout(()=>t.style.display="none",2600);}
+
+const SETTING_IDS=["fitMode","rangeMin","rangeMax","despikeOn","spikeThr","badPix","sgOn","sgWin","sgOrd","blWin","maskK","minPW","maskMargin","anchorSp","blShift","blRefine","refineWin","wMin","wMax","posTol","detK","maxPk","extraOn","offsetOn","siOn","siRef","siWin","normOn","normMode","ratioBasis","orient","regionFit","regionPoly","blMode","regionPad","regionGap","nStarts","showResid","mcN"];
+function saveLocal(){try{const s={};SETTING_IDS.forEach(id=>{const el=$("#"+id);s[id]=el.type==="checkbox"?el.checked:el.value;});s.peaks=peaksDef;s.ratios=ratios;s.normPeak=$("#normPeak").value;localStorage.setItem(STORE_KEY,JSON.stringify(s));}catch(e){}}
+function loadLocal(){try{const raw=localStorage.getItem(STORE_KEY);if(!raw)return;const s=JSON.parse(raw);SETTING_IDS.forEach(id=>{const el=$("#"+id);if(!el||!(id in s))return;if(el.type==="checkbox")el.checked=!!s[id];else el.value=s[id];});if(Array.isArray(s.peaks)&&s.peaks.length)peaksDef=s.peaks;if(Array.isArray(s.ratios))ratios=s.ratios;loadLocal.normPeak=s.normPeak;}catch(e){}}
+
+/* ---------------- numeric helpers ---------------- */
+function median(a){const b=[];for(const v of a)if(Number.isFinite(v))b.push(v);b.sort((p,q)=>p-q);const n=b.length;if(!n)return NaN;return n%2?b[(n-1)/2]:(b[n/2-1]+b[n/2])/2;}
+function stepSize(x){const d=[];for(let i=1;i<x.length;i++)d.push(Math.abs(x[i]-x[i-1]));return median(d)||1;}
+function sigmaDiff(y){const d=new Float64Array(y.length-1);for(let i=0;i<d.length;i++)d[i]=y[i+1]-y[i];const m=median(d);const ad=d.map(v=>Math.abs(v-m));return 1.4826*median(ad)/Math.SQRT2||1e-12;}
+function movAvg(a,w){w=Math.max(1,Math.round(w));const h=Math.floor(w/2),n=a.length,out=new Float64Array(n),ps=new Float64Array(n+1);for(let i=0;i<n;i++)ps[i+1]=ps[i]+a[i];for(let i=0;i<n;i++){const lo=Math.max(0,i-h),hi=Math.min(n-1,i+h);out[i]=(ps[hi+1]-ps[lo])/(hi-lo+1);}return out;}
+function rollMin(a,w){const h=Math.floor(Math.max(1,w)/2),n=a.length,out=new Float64Array(n);for(let i=0;i<n;i++){let m=Infinity;const lo=Math.max(0,i-h),hi=Math.min(n-1,i+h);for(let j=lo;j<=hi;j++)if(a[j]<m)m=a[j];out[i]=m;}return out;}
+function rollMedian(a,w){const h=Math.floor(w/2),n=a.length,out=new Float64Array(n);for(let i=0;i<n;i++){const lo=Math.max(0,i-h),hi=Math.min(n-1,i+h);out[i]=median(a.slice(lo,hi+1));}return out;}
+function solveLin(A,b){const n=b.length;const M=A.map((r,i)=>[...r,b[i]]);for(let c=0;c<n;c++){let p=c;for(let r=c+1;r<n;r++)if(Math.abs(M[r][c])>Math.abs(M[p][c]))p=r;[M[c],M[p]]=[M[p],M[c]];const d=M[c][c];if(Math.abs(d)<1e-300)return null;for(let r=0;r<n;r++){if(r===c)continue;const f=M[r][c]/d;if(f===0)continue;for(let k=c;k<=n;k++)M[r][k]-=f*M[c][k];}}return M.map((r,i)=>r[n]/r[i]);}
+function sgFilter(y,win,order){win=Math.max(5,win|0);if(win%2===0)win++;order=Math.min(Math.max(1,order|0),win-2);const m=(win-1)/2,p=order+1;const A=Array.from({length:p},()=>new Array(p).fill(0));for(let k=-m;k<=m;k++)for(let i=0;i<p;i++)for(let j=0;j<p;j++)A[i][j]+=Math.pow(k,i+j);const e=new Array(p).fill(0);e[0]=1;const z=solveLin(A,e);const c=[];for(let k=-m;k<=m;k++){let s=0;for(let j=0;j<p;j++)s+=z[j]*Math.pow(k,j);c.push(s);}const n=y.length,out=new Float64Array(n);for(let i=0;i<n;i++){let s=0;for(let k=-m;k<=m;k++){let j=i+k;if(j<0)j=-j;if(j>=n)j=2*(n-1)-j;j=Math.min(n-1,Math.max(0,j));s+=c[k+m]*y[j];}out[i]=s;}return{out,gain:Math.sqrt(c.reduce((a,v)=>a+v*v,0))};}
+function endSlope(h0,h1,d0,d1){let m=((2*h0+h1)*d0-h0*d1)/(h0+h1);if(Math.sign(m)!==Math.sign(d0))m=0;else if(Math.sign(d0)!==Math.sign(d1)&&Math.abs(m)>Math.abs(3*d0))m=3*d0;return m;}
+function pchip(xs,ys,xq){const n=xs.length,out=new Float64Array(xq.length);if(n===0)return out;if(n===1){out.fill(ys[0]);return out;}const h=[],d=[];for(let i=0;i<n-1;i++){h[i]=xs[i+1]-xs[i];d[i]=(ys[i+1]-ys[i])/h[i];}const m=new Float64Array(n);if(n===2){m[0]=m[1]=d[0];}else{for(let i=1;i<n-1;i++){if(d[i-1]*d[i]<=0)m[i]=0;else{const w1=2*h[i]+h[i-1],w2=h[i]+2*h[i-1];m[i]=(w1+w2)/(w1/d[i-1]+w2/d[i]);}}m[0]=endSlope(h[0],h[1],d[0],d[1]);m[n-1]=endSlope(h[n-2],h[n-3],d[n-2],d[n-3]);}
+ let k=0;for(let q=0;q<xq.length;q++){const xv=xq[q];if(xv<=xs[0]){out[q]=ys[0];continue;}if(xv>=xs[n-1]){out[q]=ys[n-1];continue;}while(k<n-2&&xv>xs[k+1])k++;while(k>0&&xv<xs[k])k--;const t=(xv-xs[k])/h[k],t2=t*t,t3=t2*t;out[q]=(2*t3-3*t2+1)*ys[k]+(t3-2*t2+t)*h[k]*m[k]+(-2*t3+3*t2)*ys[k+1]+(t3-t2)*h[k]*m[k+1];}return out;}
+const softplus=a=>a>30?a:Math.log1p(Math.exp(a));
+const invSoftplus=A=>A>30?A:Math.log(Math.expm1(Math.max(A,1e-9)));
+const sigm=v=>1/(1+Math.exp(-v));
+const logit=s=>Math.log(s/(1-s));
+
+/* ---------------- parsing ---------------- */
+function isMono(a){const v=a.filter(Number.isFinite);if(v.length<10||v.length<0.9*a.length)return false;let inc=0,dec=0;for(let i=1;i<v.length;i++){if(v[i]>v[i-1])inc++;else if(v[i]<v[i-1])dec++;}return inc===v.length-1||dec===v.length-1;}
+function parseText(text,fname,orientPref){
+  const lines=text.split(/\r?\n/).map(l=>l.trim()).filter(l=>l.length&&!/^(#|\/\/|%|;)/.test(l));
+  if(!lines.length)throw new Error("the file is empty");
+  const sample=lines.slice(0,40).join("\n");
+  let delim;
+  if(sample.includes("\t"))delim="\t";else if(sample.includes(";"))delim=";";else if(sample.includes(","))delim=",";else delim=/\s+/;
+  const decComma=(delim===";"||delim==="\t"||delim instanceof RegExp)&&/\d,\d/.test(sample)&&!/\d\.\d/.test(sample);
+  const toNum=s=>{if(s===undefined||s==="")return NaN;const t=decComma?s.replace(",","."):s;const v=Number(t);return Number.isFinite(v)?v:NaN;};
+  let header=null;const rows=[];
+  for(const l of lines){const tok=l.split(delim).map(s=>s.trim().replace(/^"(.*)"$/,"$1"));const nums=tok.map(toNum);const nNum=nums.filter(Number.isFinite).length;
+    if(nNum>=Math.max(1,Math.ceil(tok.length*0.5)))rows.push({tok,nums});else if(!rows.length)header=tok;}
+  if(rows.length<3)throw new Error("no numeric data found");
+  const ncol=Math.max(...rows.map(r=>r.nums.length));
+  const col=j=>rows.map(r=>r.nums[j]);
+  const spectra=[];
+  const colsOK=isMono(col(0))&&rows.length>ncol;
+  const r0=rows[0].nums;const r0x=Number.isFinite(r0[0])?r0:r0.slice(1);
+  const rowsOK=isMono(r0x)&&r0x.length>rows.length;
+  let mode=orientPref;
+  if(mode==="auto")mode=colsOK?"cols":rowsOK?"rows":"cols";
+  if(mode==="cols"){
+    if(ncol<2)throw new Error("expected a Raman shift column and at least one intensity column");
+    const pairs=ncol>=4&&ncol%2===0&&isMono(col(2))&&Math.abs(col(2)[0]-col(0)[0])<100;
+    if(pairs){for(let j=0;j<ncol;j+=2){const nm=header&&header[j+1]?header[j+1]:`S${j/2+1}`;spectra.push(mkSpec(nm,col(j),col(j+1)));}}
+    else{const x=col(0);for(let j=1;j<ncol;j++){const nm=header&&header[j]&&isNaN(Number(header[j]))?header[j]:`S${j}`;spectra.push(mkSpec(nm,x,col(j)));}}
+  }else{
+    const x=r0x;
+    for(let i=1;i<rows.length;i++){const r=rows[i];const lab=!Number.isFinite(r.nums[0]);spectra.push(mkSpec(lab?r.tok[0]:`S${i}`,x,lab?r.nums.slice(1):r.nums));}
+  }
+  const good=spectra.filter(s=>s.x.length>=20);
+  if(!good.length)throw new Error("could not read any spectrum with at least 20 points");
+  return good;
+}
+function mkSpec(name,x,y){const pts=[];for(let i=0;i<Math.min(x.length,y.length);i++)if(Number.isFinite(x[i])&&Number.isFinite(y[i]))pts.push([x[i],y[i]]);pts.sort((a,b)=>a[0]-b[0]);return{name:String(name).trim()||"spectrum",x:Float64Array.from(pts,p=>p[0]),y:Float64Array.from(pts,p=>p[1])};}
+
+/* ---------------- preprocessing ---------------- */
+function despike(y,thr){const n=y.length,out=Float64Array.from(y);const s=sigmaDiff(y);const med=rollMedian(y,9);let count=0;
+  for(let i=1;i<n-1;i++){if(y[i]-med[i]<=thr*s)continue;let j=i;while(j+1<n&&y[j+1]-med[j+1]>thr*s&&j-i<2)j++;const len=j-i+1;if(len>2){i=j;continue;}
+    let ph=0;for(let k=i;k<=j;k++)ph=Math.max(ph,y[k]-med[k]);const L=i>0?y[i-1]-med[i-1]:0,R=j<n-1?y[j+1]-med[j+1]:0;
+    if(L<0.25*ph&&R<0.25*ph&&i>0&&j<n-1){const ya=y[i-1],yb=y[j+1];for(let k=i;k<=j;k++){const t=(k-(i-1))/(j+1-(i-1));out[k]=ya+(yb-ya)*t;}count+=len;}
+    i=j;}
+  return{y:out,count};}
+function fixBadPixels(x,y,list){const out=Float64Array.from(y);let c=0;for(const v of list){let k=0,best=Infinity;for(let i=0;i<x.length;i++){const d=Math.abs(x[i]-v);if(d<best){best=d;k=i;}}if(best>5)continue;const a=k>0?out[k-1]:out[k+1],b=k<out.length-1?out[k+1]:out[k-1];out[k]=(a+b)/2;c++;}return{y:out,count:c};}
+
+/* ---------------- adaptive baseline ---------------- */
+function adaptiveBaseline(x,y,sigma,P){
+  const n=x.length,dx=stepSize(x);
+  const W=Math.max(5,Math.round(P.blWin/dx));
+  const ysm=movAvg(y,5);
+  let b=movAvg(rollMin(ysm,W),W);
+  {const r=new Float64Array(n);for(let i=0;i<n;i++)r[i]=y[i]-b[i];const off=median(r);if(off>0)for(let i=0;i<n;i++)b[i]+=off;}
+  const minW=Math.max(2,Math.round(P.minPW/dx));
+  const L=Math.max(3,2*minW+1);
+  const marg=Math.max(1,Math.round(P.maskMargin/dx));
+  const binW=Math.max(P.anchorSp,3*dx);
+  let mask,anchors=[],removedAnchors=0;
+  for(let outer=0;outer<3;outer++){
+    const res=new Float64Array(n);for(let i=0;i<n;i++)res[i]=y[i]-b[i];
+    const rs=movAvg(res,L);
+    const raw=new Uint8Array(n);
+    for(let i=0;i<n;i++)if(res[i]>P.maskK*sigma||rs[i]>P.maskK*sigma/Math.sqrt(L))raw[i]=1;
+    // keep only structured runs
+    const m0=new Uint8Array(n);let i=0;
+    while(i<n){if(raw[i]){let j=i;while(j<n&&raw[j])j++;let peakish=false;
+        if(j-i>=minW){let cnt=0;for(let k=i;k<j;k++)if(rs[k]>P.maskK*sigma/Math.sqrt(L))cnt++;peakish=cnt>=Math.max(2,Math.floor(minW/2));}
+        if(peakish&&(i===0||j===n)){let am=i;for(let k=i;k<j;k++)if(rs[k]>rs[am])am=k;if((i===0&&am-i<minW)||(j===n&&j-1-am<minW))peakish=false;}
+        if(peakish)for(let k=i;k<j;k++)m0[k]=1;i=j;}else i++;}
+    mask=new Uint8Array(n);for(let k=0;k<n;k++)if(m0[k]){const lo=Math.max(0,k-marg),hi=Math.min(n-1,k+marg);for(let q=lo;q<=hi;q++)mask[q]=1;}
+    // anchors from unmasked bins
+    anchors=[];const x0=x[0];let bin=[];let binIdx=0;
+    const flush=()=>{if(!bin.length)return;const un=bin.filter(k=>!mask[k]);if(un.length>=3&&un.length>=0.3*bin.length){let sx=0;for(const k of un)sx+=x[k];anchors.push({x:sx/un.length,y:median(un.map(k=>y[k])),idx:un});}bin=[];};
+    for(let k=0;k<n;k++){const bi=Math.floor((x[k]-x0)/binW);if(bi!==binIdx){flush();binIdx=bi;}bin.push(k);}flush();
+    if(anchors.length<2){const un=[];for(let k=0;k<n;k++)if(!mask[k])un.push(k);
+      if(un.length<2){anchors=[{x:x[0],y:median(y.slice(0,Math.max(3,(n/20)|0))),idx:[0]},{x:x[n-1],y:median(y.slice(n-Math.max(3,(n/20)|0))),idx:[n-1]}];}
+      else{const a=un.slice(0,Math.max(1,(un.length/4)|0)),z=un.slice(-Math.max(1,(un.length/4)|0));anchors=[{x:x[a[0]],y:median(a.map(k=>y[k])),idx:a},{x:x[z[z.length-1]],y:median(z.map(k=>y[k])),idx:z}];}}
+    // iterative removal of anchors systematically above the baseline
+    for(let it=0;it<60&&anchors.length>3;it++){
+      const bl=movAvg(pchip(anchors.map(a=>a.x),anchors.map(a=>a.y),x),Math.round(W/2));
+      let worst=-1,wv=0;
+      anchors.forEach((a,ai)=>{const r=median(a.idx.map(k=>y[k]-bl[k]));const lim=Math.max(3*1.2533*sigma/Math.sqrt(a.idx.length),0.5*sigma);if(r>lim&&r-lim>wv){wv=r-lim;worst=ai;}});
+      if(worst<0)break;anchors.splice(worst,1);removedAnchors++;
+    }
+    b=movAvg(pchip(anchors.map(a=>a.x),anchors.map(a=>a.y),x),Math.round(W/2));
+  }
+  const final=new Float64Array(n);for(let k=0;k<n;k++)final[k]=b[k]-P.blShift*sigma;
+  return{baseline:final,mask,anchors,removedAnchors};
+}
+
+/* ---------------- fitting ---------------- */
+/* local quadratic regression with a window of ±h cm-1, truncated at the ends (no padding) */
+function localQuad(x,y,h){const n=x.length,out=new Float64Array(n);let lo=0,hi=0;
+  for(let i=0;i<n;i++){const xi=x[i];while(x[lo]<xi-h)lo++;while(hi<n-1&&x[hi+1]<=xi+h)hi++;
+    let S0=0,S1=0,S2=0,S3=0,S4=0,T0=0,T1=0,T2=0;
+    for(let j=lo;j<=hi;j++){const d=(x[j]-xi)/h,d2=d*d,wt=(1-Math.abs(d)**3)**3;S0+=wt;S1+=wt*d;S2+=wt*d2;S3+=wt*d2*d;S4+=wt*d2*d2;T0+=wt*y[j];T1+=wt*y[j]*d;T2+=wt*y[j]*d2;}
+    const s=solveLin([[S0,S1,S2],[S1,S2,S3],[S2,S3,S4]],[T0,T1,T2]);out[i]=s?s[0]:T0/S0;}
+  return out;}
+function lor(x,x0,w,A){const h=w/2,d=x-x0;return A*h*h/(d*d+h*h);}
+function invertMat(A){const n=A.length;const M=A.map((r,i)=>{const row=Array.from(r);for(let j=0;j<n;j++)row.push(i===j?1:0);return row;});
+  for(let c=0;c<n;c++){let p=c;for(let r=c+1;r<n;r++)if(Math.abs(M[r][c])>Math.abs(M[p][c]))p=r;if(Math.abs(M[p][c])<1e-300)return null;[M[c],M[p]]=[M[p],M[c]];const d=M[c][c];for(let k=0;k<2*n;k++)M[c][k]/=d;
+    for(let r=0;r<n;r++){if(r===c)continue;const f=M[r][c];if(f===0)continue;for(let k=0;k<2*n;k++)M[r][k]-=f*M[c][k];}}
+  return M.map(r=>r.slice(n));}
+/* small numeric Levenberg-Marquardt for the Si calibration fit */
+function lmSmall(model,p0,xs,ys,iters=60){
+  let p=Float64Array.from(p0);const M=p.length,N=xs.length;
+  const sse=q=>{let s=0;for(let i=0;i<N;i++){const r=ys[i]-model(xs[i],q);s+=r*r;}return s;};
+  let cur=sse(p),lam=1e-3;
+  for(let it=0;it<iters;it++){
+    const r=new Float64Array(N);for(let i=0;i<N;i++)r[i]=ys[i]-model(xs[i],p);
+    const cols=[];for(let a=0;a<M;a++){const h=1e-6*Math.max(1,Math.abs(p[a]));const q=Float64Array.from(p);q[a]+=h;const c=new Float64Array(N);for(let i=0;i<N;i++)c[i]=(model(xs[i],q)-model(xs[i],p))/h;cols.push(c);}
+    const JTJ=Array.from({length:M},()=>new Array(M).fill(0)),JTr=new Array(M).fill(0);
+    for(let a=0;a<M;a++){for(let b=a;b<M;b++){let s=0;for(let i=0;i<N;i++)s+=cols[a][i]*cols[b][i];JTJ[a][b]=JTJ[b][a]=s;}let s=0;for(let i=0;i<N;i++)s+=cols[a][i]*r[i];JTr[a]=s;}
+    let ok=false;
+    for(let t=0;t<8;t++){const A=JTJ.map((row,a)=>row.map((v,b)=>a===b?v*(1+lam)+1e-30:v));const d=solveLin(A,JTr);if(!d){lam*=10;continue;}
+      const q=Float64Array.from(p,(v,a)=>v+d[a]);const e=sse(q);if(e<cur){const rel=(cur-e)/Math.max(cur,1e-30);p=q;cur=e;lam=Math.max(lam/3,1e-12);ok=true;if(rel<1e-11)it=iters;break;}lam*=4;}
+    if(!ok)break;}
+  return{p,sse:cur};}
+function fitSi(x,y,ref,win){
+  const idx=[];for(let i=0;i<x.length;i++)if(Math.abs(x[i]-ref)<=win+12)idx.push(i);
+  if(idx.length<12)return{ok:false,reason:"Si region outside the data"};
+  const xs=idx.map(i=>x[i]),ys=idx.map(i=>y[i]);
+  const sig=sigmaDiff(Float64Array.from(ys));
+  let im=-1,ymax=-Infinity;for(let k=0;k<xs.length;k++)if(Math.abs(xs[k]-ref)<=win&&ys[k]>ymax){ymax=ys[k];im=k;}
+  if(im<0)return{ok:false,reason:"no Si maximum in window"};
+  const e=Math.min(4,Math.floor(xs.length/6));const xl=xs.slice(0,e).reduce((a,b)=>a+b,0)/e,yl=ys.slice(0,e).reduce((a,b)=>a+b,0)/e,xr=xs.slice(-e).reduce((a,b)=>a+b,0)/e,yr=ys.slice(-e).reduce((a,b)=>a+b,0)/e;
+  const b1=(yr-yl)/(xr-xl||1),b0=yl+b1*(ref-xl);
+  const A0=ymax-(b0+b1*(xs[im]-ref));
+  if(A0<5*sig)return{ok:false,reason:"Si peak too weak"};
+  const model=(xv,p)=>p[3]+p[4]*(xv-ref)+lor(xv,p[0],Math.abs(p[1]),p[2]);
+  const {p}=lmSmall(model,[xs[im],5,A0,b0,b1],xs,ys);
+  const w=Math.abs(p[1]);
+  if(!(Math.abs(p[0]-ref)<=win)||w<0.5||w>30||p[2]<5*sig)return{ok:false,reason:"Si fit not reliable"};
+  return{ok:true,x0:p[0],w,shift:ref-p[0]};}
+
+function detectPeaks(x,z,sig,P){
+  const n=x.length,dx=stepSize(x),zs=movAvg(z,3),r=Math.max(1,Math.round(4/dx)),lim=Math.round(30/dx);
+  const cands=[];
+  for(let i=1;i<n-1;i++){if(zs[i]<P.detK*sig)continue;let ok=true;for(let k=Math.max(0,i-r);k<=Math.min(n-1,i+r);k++)if(zs[k]>zs[i]){ok=false;break;}if(!ok)continue;
+    let lm=zs[i];for(let k=i-1;k>=Math.max(0,i-lim);k--){if(zs[k]>zs[i])break;lm=Math.min(lm,zs[k]);}
+    let rm=zs[i];for(let k=i+1;k<=Math.min(n-1,i+lim);k++){if(zs[k]>zs[i])break;rm=Math.min(rm,zs[k]);}
+    const prom=zs[i]-Math.max(lm,rm);if(prom<P.detK*sig)continue;
+    let a=i;while(a>0&&zs[a]>zs[i]/2)a--;let b=i;while(b<n-1&&zs[b]>zs[i]/2)b++;
+    cands.push({x0:x[i],c:x[i],A:zs[i],w:Math.min(P.wMax*0.9,Math.max(P.wMin*1.5,x[b]-x[a])),prom,tol:P.posTol,wmin:P.wMin,wmax:P.wMax});}
+  cands.sort((p,q)=>q.prom-p.prom);const out=[];
+  for(const c of cands){if(out.length>=P.maxPk)break;if(out.every(o=>Math.abs(o.x0-c.x0)>6))out.push(c);}
+  return out;}
+function globalStage(x,z,peaks,P,linCols){
+  if(linCols===true)linCols=[new Float64Array(x.length).fill(1)];if(!linCols)linCols=[];
+  const N=x.length,K=peaks.length,L=linCols.length,M=K+L;
+  const cols=peaks.map(p=>{const c=new Float64Array(N);for(let i=0;i<N;i++)c[i]=lor(x[i],p.x0,p.w,1);return c;});
+  for(const c of linCols)cols.push(c);
+  const dot=(a,b)=>{let s=0;for(let i=0;i<N;i++)s+=a[i]*b[i];return s;};
+  const G=Array.from({length:M},()=>new Float64Array(M)),bv=new Float64Array(M);
+  for(let i=0;i<M;i++){bv[i]=dot(cols[i],z);for(let j=i;j<M;j++){G[i][j]=G[j][i]=dot(cols[i],cols[j]);}}
+  const yy=dot(z,z);let a=new Float64Array(M);peaks.forEach((p,k)=>a[k]=Math.max(0,p.A));
+  const solve=(a0,sweeps)=>{const a=Float64Array.from(a0);for(let s=0;s<sweeps;s++){for(let k=0;k<M;k++){let g=bv[k];for(let j=0;j<M;j++)g-=G[k][j]*a[j];if(G[k][k]>0){const v=a[k]+g/G[k][k];a[k]=k<K?Math.max(0,v):v;}}}return a;};
+  const sse=a=>{let s=yy;for(let i=0;i<M;i++){s-=2*a[i]*bv[i];let t=0;for(let j=0;j<M;j++)t+=G[i][j]*a[j];s+=a[i]*t;}return s;};
+  a=solve(a,80);let best=sse(a);
+  const setCol=(k,x0,w)=>{const c=cols[k];for(let i=0;i<N;i++)c[i]=lor(x[i],x0,w,1);bv[k]=dot(c,z);for(let j=0;j<M;j++){G[k][j]=G[j][k]=dot(c,cols[j]);}};
+  const wGridOf=p=>{const g=[];for(let i=0;i<10;i++)g.push(p.wmin*Math.pow(p.wmax/p.wmin,(i+0.5)/10));return g;};
+  for(let sweep=0;sweep<2;sweep++){
+    for(let k=0;k<K;k++){const p=peaks[k];let bx=p.x0,bw=p.w;
+      const xs=[];for(let s=-3;s<=3;s++)xs.push(p.c+s*p.tol/3*0.95);xs.push(p.x0);
+      for(const x0 of xs)for(const w of [...wGridOf(p),p.w]){setCol(k,x0,w);const at=solve(a,25);const e=sse(at);if(e<best-1e-15){best=e;bx=x0;bw=w;a=at;}}
+      p.x0=bx;p.w=bw;setCol(k,bx,bw);a=solve(a,40);best=sse(a);}}
+  peaks.forEach((p,k)=>p.A=Math.max(a[k],1e-6));
+  return Float64Array.from(a.slice(K));}
+function lmRefine(x,z,peaks,lin,P){
+  const N=x.length,K=peaks.length,L=lin.cols.length,M=3*K+L;if(!M)return;
+  const p=new Float64Array(M);
+  peaks.forEach((pk,k)=>{p[3*k]=Math.atanh(Math.max(-0.95,Math.min(0.95,(pk.x0-pk.c)/pk.tol)));p[3*k+1]=logit(Math.max(0.02,Math.min(0.98,(pk.w-pk.wmin)/(pk.wmax-pk.wmin))));p[3*k+2]=invSoftplus(Math.max(pk.A,1e-6));});
+  for(let l=0;l<L;l++)p[3*K+l]=lin.coef[l];
+  const evalAll=(p,wantJ)=>{const r=new Float64Array(N);const J=wantJ?Array.from({length:N},()=>new Float64Array(M)):null;let sse=0;
+    const dec=[];for(let k=0;k<K;k++){const th=Math.tanh(p[3*k]),s=sigm(p[3*k+1]);const wr=peaks[k].wmax-peaks[k].wmin;dec.push({x0:peaks[k].c+peaks[k].tol*th,w:peaks[k].wmin+wr*s,A:softplus(p[3*k+2]),dx0:peaks[k].tol*(1-th*th),dw:wr*s*(1-s),dA:sigm(p[3*k+2])});}
+    for(let i=0;i<N;i++){let m=0;const xi=x[i];
+      for(let l=0;l<L;l++){const c=lin.cols[l][i];m+=p[3*K+l]*c;if(wantJ)J[i][3*K+l]=c;}
+      for(let k=0;k<K;k++){const q=dec[k],d=xi-q.x0,w2=q.w*q.w,den=4*d*d+w2,g=w2/den;m+=q.A*g;
+        if(wantJ){const den2=den*den;J[i][3*k]=q.A*8*d*w2/den2*q.dx0;J[i][3*k+1]=q.A*8*q.w*d*d/den2*q.dw;J[i][3*k+2]=g*q.dA;}}
+      r[i]=z[i]-m;sse+=r[i]*r[i];}
+    return{r,J,sse,dec};};
+  let cur=evalAll(p,true),lam=1e-3;
+  for(let it=0;it<120;it++){
+    const JTJ=Array.from({length:M},()=>new Float64Array(M)),JTr=new Float64Array(M);
+    for(let i=0;i<N;i++){const Ji=cur.J[i],ri=cur.r[i];for(let a=0;a<M;a++){const v=Ji[a];if(v===0)continue;JTr[a]+=v*ri;const row=JTJ[a];for(let b=a;b<M;b++)row[b]+=v*Ji[b];}}
+    for(let a=0;a<M;a++)for(let b=0;b<a;b++)JTJ[a][b]=JTJ[b][a];
+    let improved=false;
+    for(let tries=0;tries<8;tries++){const A=JTJ.map((row,a)=>{const rr=Array.from(row);rr[a]+=lam*(row[a]||1e-12)+1e-30;return rr;});const d=solveLin(A,Array.from(JTr));if(!d){lam*=10;continue;}
+      const pn=Float64Array.from(p,(v,a)=>v+d[a]);const tr=evalAll(pn,false);
+      if(tr.sse<cur.sse){const rel=(cur.sse-tr.sse)/Math.max(cur.sse,1e-30);p.set(pn);cur=evalAll(p,true);lam=Math.max(lam/3,1e-12);improved=true;if(rel<1e-10)it=999;break;}
+      lam*=4;}
+    if(!improved)break;}
+  cur.dec.forEach((q,k)=>{peaks[k].x0=q.x0;peaks[k].w=q.w;peaks[k].A=q.A;peaks[k].uFrac=Math.abs(q.x0-peaks[k].c)/peaks[k].tol;peaks[k].wFrac=(q.w-peaks[k].wmin)/(peaks[k].wmax-peaks[k].wmin);});
+  for(let l=0;l<L;l++)lin.coef[l]=p[3*K+l];}
+/* covariance of natural parameters (x0, w, A per peak, then offset) */
+function fitCovariance(x,z,peaks,lin){
+  const N=x.length,K=peaks.length,L=lin.cols.length,M=3*K+L;if(!K||N<=M+2)return null;
+  const JTJ=Array.from({length:M},()=>new Array(M).fill(0));const row=new Float64Array(M);let sse=0;
+  for(let i=0;i<N;i++){let m=0;for(let l=0;l<L;l++){const c=lin.cols[l][i];row[3*K+l]=c;m+=lin.coef[l]*c;}
+    for(let k=0;k<K;k++){const p=peaks[k],d=x[i]-p.x0,w2=p.w*p.w,den=4*d*d+w2,g=w2/den,den2=den*den;m+=p.A*g;row[3*k]=p.A*8*d*w2/den2;row[3*k+1]=p.A*8*p.w*d*d/den2;row[3*k+2]=g;}
+    const r=z[i]-m;sse+=r*r;
+    for(let a=0;a<M;a++){const v=row[a];if(v===0)continue;const ra=JTJ[a];for(let b=a;b<M;b++)ra[b]+=v*row[b];}}
+  for(let a=0;a<M;a++)for(let b=0;b<a;b++)JTJ[a][b]=JTJ[b][a];
+  let maxD=0;for(let a=0;a<M;a++)maxD=Math.max(maxD,JTJ[a][a]);
+  const bad=new Set();for(let a=0;a<M;a++)if(JTJ[a][a]<1e-13*maxD){JTJ[a][a]=1e-13*maxD+1e-300;bad.add(a);}
+  const inv=invertMat(JTJ);if(!inv)return null;
+  const s2=sse/(N-M);
+  const C=inv.map(r=>r.map(v=>v*s2));
+  bad.forEach(a=>{C[a][a]=NaN;});
+  return C;}
+function splineBasis(x,spacing){
+  const n=x.length,x0=x[0],x1=x[n-1];const nInt=Math.max(1,Math.ceil((x1-x0)/spacing));const s=(x1-x0)/nInt;const nb=nInt+3;const cols=[];
+  const B=u=>u<0||u>=4?0:u<1?u*u*u/6:u<2?(-3*u*u*u+12*u*u-12*u+4)/6:u<3?(3*u*u*u-24*u*u+60*u-44)/6:(4-u)**3/6;
+  for(let j=0;j<nb;j++){const t=x0+(j-3)*s;const c=new Float64Array(n);for(let i=0;i<n;i++)c[i]=B((x[i]-t)/s);cols.push(c);}
+  return cols;}
+
+/* ---------------- regional fit (fixed model, as in Yumigeta et al. Fig. S3) ---------------- */
+function makeRegions(targets,lo,hi,P){
+  const ts=targets.filter(t=>t.pos>=lo&&t.pos<=hi).sort((a,b)=>a.pos-b.pos);const groups=[];
+  for(const t of ts){const g=groups[groups.length-1];if(g&&t.pos-g[g.length-1].pos<=P.regionGap)g.push(t);else groups.push([t]);}
+  const reg=groups.map(g=>({lo:Math.max(lo,g[0].pos-P.regionPad),hi:Math.min(hi,g[g.length-1].pos+P.regionPad),targets:g}));
+  for(let i=0;i<reg.length-1;i++)if(reg[i].hi>reg[i+1].lo){const a=reg[i].targets[reg[i].targets.length-1].pos,b=reg[i+1].targets[0].pos;const mid=(a+b)/2;reg[i].hi=mid;reg[i+1].lo=mid;}
+  return reg;}
+function legendreCols(xr,order){const n=xr.length,lo=xr[0],hi=xr[n-1],mid=(lo+hi)/2,half=Math.max((hi-lo)/2,1e-9);const cols=[];
+  for(let o=0;o<=order;o++){const c=new Float64Array(n);for(let i=0;i<n;i++){const u=(xr[i]-mid)/half;c[i]=o===0?1:o===1?u:o===2?(3*u*u-1)/2:(5*u*u*u-3*u)/2;}cols.push(c);}return cols;}
+function sseOf(x,z,peaks,lin){let s=0;for(let i=0;i<x.length;i++){let m=0;for(let l=0;l<lin.cols.length;l++)m+=lin.coef[l]*lin.cols[l][i];for(const p of peaks)m+=lor(x[i],p.x0,p.w,p.A);s+=(z[i]-m)**2;}return s;}
+function fitRegional(xf,zf,sigma,P,targets){
+  let scale=0;for(const v of zf)scale=Math.max(scale,Math.abs(v));if(!scale)scale=1;
+  const z=Float64Array.from(zf,v=>v/scale),sig=sigma/scale;
+  const regions=makeRegions(targets,xf[0],xf[xf.length-1],P);
+  const allPeaks=[],regOut=[],bg=new Float64Array(xf.length),inReg=new Int16Array(xf.length).fill(-1);
+  let ssTot=0,nTot=0;let seed=12345;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+  regions.forEach((R,ri)=>{
+    const idx=[];for(let i=0;i<xf.length;i++)if(xf[i]>=R.lo&&xf[i]<=R.hi)idx.push(i);
+    if(idx.length<R.targets.length*3+P.regionPoly+4)return;
+    const xr=Float64Array.from(idx,i=>xf[i]),zr=Float64Array.from(idx,i=>z[i]);
+    const cols=legendreCols(xr,P.regionPoly);
+    const nearest=pos=>{let k=0,bd=Infinity;for(let i=0;i<xr.length;i++){const d=Math.abs(xr[i]-pos);if(d<bd){bd=d;k=i;}}return k;};
+    const seedPk=t=>{const wmin=t.wmin>0?t.wmin:P.wMin,wr=t.wmax>0?t.wmax:P.wMax,wmax=wr>wmin?wr:wmin*4;return{x0:t.pos,c:t.pos,tol:t.tol>0?t.tol:P.posTol,wmin,wmax,A:Math.max(zr[nearest(t.pos)]*0.5,sig),w:Math.min(wmax*0.9,Math.max(wmin*1.2,Math.sqrt(wmin*wmax))),label:t.name,named:true};};
+    let best=null;
+    for(let s=0;s<P.nStarts;s++){
+      const pk=R.targets.map(seedPk);
+      if(s>0)pk.forEach(p=>{p.x0=p.c+p.tol*(2*rnd()-1)*0.8;p.w=p.wmin*Math.pow(p.wmax/p.wmin,0.1+0.8*rnd());});
+      const lin={cols,coef:new Float64Array(cols.length)};
+      lin.coef.set(globalStage(xr,zr,pk,P,cols));lmRefine(xr,zr,pk,lin,P);
+      const e=sseOf(xr,zr,pk,lin);if(!best||e<best.e)best={e,pk,lin};}
+    const C=fitCovariance(xr,zr,best.pk,best.lin);
+    for(let j=0;j<idx.length;j++){let m=0;for(let l=0;l<cols.length;l++)m+=best.lin.coef[l]*cols[l][j];bg[idx[j]]=m*scale;inReg[idx[j]]=ri;}
+    ssTot+=best.e;nTot+=idx.length;
+    best.pk.forEach((p,k)=>{p.region=ri;p.k=k;allPeaks.push(p);});
+    regOut[ri]={lo:R.lo,hi:R.hi,cov:C,rmse:Math.sqrt(best.e/idx.length)/sig};});
+  const fit=finishPeaks(allPeaks,scale,sig,P,p=>regOut[p.region].cov);
+  return{peaks:allPeaks,offset:0,bg,rmseSigma:Math.sqrt(ssTot/Math.max(nTot,1))/sig,removed:[],cov:null,regions:regOut,...fit};}
+function finishPeaks(peaks,scale,sig,P,covOf){
+  peaks.forEach(p=>{const C=covOf(p);const k=p.k;p.As=p.A;
+    const vx=C?C[3*k][3*k]:NaN,vw=C?C[3*k+1][3*k+1]:NaN,vA=C?C[3*k+2][3*k+2]:NaN,cAw=C?C[3*k+2][3*k+1]:NaN;
+    p.ex0=Math.sqrt(vx);p.ew=Math.sqrt(vw);p.eA=Math.sqrt(vA)*scale;
+    const varArea=(Math.PI/2)**2*(p.w*p.w*vA+p.A*p.A*vw+2*p.A*p.w*cAw);
+    p.A*=scale;p.area=Math.PI/2*p.A*p.w;p.eArea=Math.sqrt(Math.max(varArea,0))*scale;
+    if(p.named){const fl=[];if(p.As<P.detK*sig)fl.push(`weak (below ${P.detK}σ)`);if(p.uFrac>0.97)fl.push("position at its ± limit");if(p.wFrac<0.01)fl.push("FWHM at its minimum");if(p.wFrac>0.99)fl.push("FWHM at its maximum");p.flag=fl.join(", ");}});
+  return{};}
+
+function fitSpectrum(xf,zf,sigma,P,targets,init){
+  if(!init&&P.fitMode==="fixed"&&P.regionFit)return fitRegional(xf,zf,sigma,P,targets);
+  let scale=0;for(const v of zf)scale=Math.max(scale,Math.abs(v));if(!scale)scale=1;
+  const z=Float64Array.from(zf,v=>v/scale),sig=sigma/scale;
+  const log=[];let peaks=[];
+  if(init){peaks=init.peaks.map(p=>({x0:p.x0,c:p.c,tol:p.tol,wmin:p.wmin,wmax:p.wmax,A:Math.max(p.A/scale,1e-6),w:p.w,label:p.label,named:p.named}));
+    const lin={cols:init.cols,coef:new Float64Array(init.cols.length).fill(init.offset/scale)};lmRefine(xf,z,peaks,lin,P);return finishFit(xf,z,scale,sig,peaks,lin,P,targets,init.removed||[]);}
+  const lo=xf[0],hi=xf[xf.length-1];
+  const nearest=pos=>{let k=0,bd=Infinity;for(let i=0;i<xf.length;i++){const d=Math.abs(xf[i]-pos);if(d<bd){bd=d;k=i;}}return k;};
+  const seed=t=>{const wmin=t.wmin>0?t.wmin:P.wMin,wmaxRaw=t.wmax>0?t.wmax:P.wMax,wmax=wmaxRaw>wmin?wmaxRaw:wmin*4;return{x0:t.pos,c:t.pos,tol:t.tol>0?t.tol:P.posTol,A:Math.max(z[nearest(t.pos)]*0.5,sig),w:Math.min(wmax*0.9,Math.max(wmin*1.2,Math.sqrt(wmin*wmax))),wmin,wmax,label:t.name,named:P.fitMode==="fixed"};};
+  if(P.fitMode==="fixed"){
+    for(const t of targets)if(t.pos>=lo&&t.pos<=hi)peaks.push(seed(t));
+    if(P.extraOn){for(const d of detectPeaks(xf,z,sig,P))if(!peaks.some(p=>Math.abs(p.c-d.x0)<=Math.max(p.tol,8)))peaks.push(d);}
+  }else{
+    peaks=detectPeaks(xf,z,sig,P);
+    for(const t of targets){if(t.pos<lo||t.pos>hi)continue;const tol=t.tol>0?t.tol:P.posTol;if(peaks.some(p=>Math.abs(p.x0-t.pos)<=tol))continue;const s=seed(t);s.label=null;peaks.push(s);}
+  }
+  peaks.sort((a,b)=>a.c-b.c);
+  const lin={cols:P.offsetOn?[new Float64Array(xf.length).fill(1)]:[],coef:new Float64Array(P.offsetOn?1:0)};
+  if(peaks.length){const co=globalStage(xf,z,peaks,P,lin.cols);lin.coef.set(co);lmRefine(xf,z,peaks,lin,P);}
+  for(let iter=0;iter<15&&peaks.length;iter++){
+    const drop=new Map();
+    peaks.forEach((p,k)=>{if(p.named)return;if(p.A<P.detK*sig)drop.set(k,"negligible amplitude");else if(p.uFrac>0.97)drop.set(k,"position at limit");else if(p.wFrac<0.01||p.wFrac>0.99)drop.set(k,"width at limit");});
+    for(let i=0;i<peaks.length;i++)for(let j=i+1;j<peaks.length;j++){if(drop.has(i)||drop.has(j))continue;const a=peaks[i],b=peaks[j];if(a.named&&b.named)continue;
+      if(Math.abs(a.x0-b.x0)<0.5*Math.max(a.w,b.w)){let k;if(a.named)k=j;else if(b.named)k=i;else k=(a.A*a.w<b.A*b.w)?i:j;drop.set(k,"nested");}}
+    if(!drop.size)break;
+    const keep=[];peaks.forEach((p,k)=>{if(drop.has(k))log.push(`${p.x0.toFixed(1)} cm⁻¹ (${drop.get(k)})`);else keep.push(p);});peaks=keep;
+    if(peaks.length)lmRefine(xf,z,peaks,lin,P);}
+  return finishFit(xf,z,scale,sig,peaks,lin,P,targets,log);}
+function finishFit(xf,z,scale,sig,peaks,lin,P,targets,log){
+  if(P.fitMode==="adaptive"){
+    for(const t of targets){let best=null,bd=Infinity;const tol=t.tol>0?t.tol:P.posTol;for(const p of peaks){const d=Math.abs(p.x0-t.pos);if(d<=tol&&d<bd&&!p.label){bd=d;best=p;}}if(best)best.label=t.name;}}
+  const C=fitCovariance(xf,z,peaks,lin);
+  const bg=new Float64Array(xf.length);for(let l=0;l<lin.cols.length;l++){const c=lin.cols[l],a=lin.coef[l];for(let i=0;i<xf.length;i++)bg[i]+=a*c[i];}
+  let ss=0;for(let i=0;i<xf.length;i++){let m=bg[i];for(const p of peaks)m+=lor(xf[i],p.x0,p.w,p.A);ss+=(z[i]-m)**2;}
+  const rmse=Math.sqrt(ss/xf.length)/sig;
+  peaks.forEach((p,k)=>{p.k=k;});finishPeaks(peaks,scale,sig,P,()=>C);
+  const isOffset=lin.cols.length===1;
+  return{peaks,offset:isOffset?lin.coef[0]*scale:0,bg:isOffset?null:Float64Array.from(bg,v=>v*scale),rmseSigma:rmse,removed:log,cov:C};}
+function ratioWithErr(fit,pn,pd,basis){
+  if(!pd)return{v:null,e:null};if(!pn)return{v:0,e:null};
+  const v=basis==="height"?pn.A/pd.A:pn.area/pd.area;
+  const covOf=p=>fit.regions?(fit.regions[p.region]||{}).cov:fit.cov;
+  const terms=(p,sgn)=>{const t=[[3*p.k+2,sgn/p.As]];if(basis!=="height")t.push([3*p.k+1,sgn/p.w]);return t;};
+  const quad=(C,g)=>{let s=0;for(const [a,ga] of g)for(const [b,gb] of g)s+=ga*gb*C[a][b];return s;};
+  let varL;
+  const Cn=covOf(pn),Cd=covOf(pd);if(!Cn||!Cd)return{v,e:NaN};
+  if(Cn===Cd&&!(pn===pd))varL=quad(Cn,[...terms(pn,1),...terms(pd,-1)]);
+  else if(pn===pd)varL=0;
+  else varL=quad(Cn,terms(pn,1))+quad(Cd,terms(pd,-1));
+  return{v,e:Math.abs(v)*Math.sqrt(Math.max(varL,0))};}
+/* ---------------- pipeline ---------------- */
+function readParams(){
+  const num=id=>{const v=parseFloat($("#"+id).value);return Number.isFinite(v)?v:null;};
+  const P={fitMode:$("#fitMode").value,rangeMin:num("rangeMin"),rangeMax:num("rangeMax"),despikeOn:$("#despikeOn").checked,spikeThr:num("spikeThr")??6,
+    badPix:$("#badPix").value.split(/[,;\s]+/).map(Number).filter(v=>Number.isFinite(v)&&v>0),sgOn:$("#sgOn").checked,sgWin:num("sgWin")??11,sgOrd:num("sgOrd")??3,
+    blWin:num("blWin")??80,maskK:num("maskK")??3,minPW:num("minPW")??5,maskMargin:num("maskMargin")??12,anchorSp:num("anchorSp")??20,blShift:num("blShift")??0.5,
+    wMin:Math.max(0.5,num("wMin")??2),wMax:num("wMax")??80,posTol:Math.max(1,num("posTol")??10),detK:num("detK")??3,maxPk:Math.max(1,num("maxPk")??20),extraOn:$("#extraOn").checked,offsetOn:$("#offsetOn").checked,
+    siOn:$("#siOn").checked,siRef:num("siRef")??520.5,siWin:Math.max(2,num("siWin")??15),ratioBasis:$("#ratioBasis").value,blRefine:$("#blRefine").checked,refineWin:Math.max(30,num("refineWin")??150),regionFit:$("#regionFit").checked,regionPoly:Math.max(0,Math.min(3,num("regionPoly")??1)),regionPad:Math.max(20,num("regionPad")??80),regionGap:Math.max(20,num("regionGap")??150),nStarts:Math.max(1,Math.min(30,num("nStarts")??8)),regionRaw:$("#blMode").value==="local",mcN:Math.max(0,parseInt($("#mcN").value)||0)};
+  if(P.wMax<=P.wMin)P.wMax=P.wMin*10;
+  return P;}
+function processOne(file,spec,P,targets){
+  const norm=(file.power>0?file.power:1)*(file.time>0?file.time:1);
+  let x=Float64Array.from(spec.x);let y=Float64Array.from(spec.y,v=>v/norm);const notes=[];
+  if(P.badPix.length){const r=fixBadPixels(x,y,P.badPix);y=r.y;if(r.count)notes.push(`${r.count} bad pixel(s) interpolated`);}
+  if(P.despikeOn){const r=despike(y,P.spikeThr);y=r.y;if(r.count)notes.push(`${r.count} spike pixel(s) replaced`);}
+  let si={ok:false,shift:0,reason:"calibration off"};
+  if(P.siOn){si=fitSi(x,y,P.siRef,P.siWin);if(si.ok){const s=si.shift;x=Float64Array.from(x,v=>v+s);}else notes.push(`Si calibration skipped (${si.reason})`);}
+  let lo=0,hi=x.length-1;
+  if(P.rangeMin!==null)while(lo<hi&&x[lo]<P.rangeMin)lo++;
+  if(P.rangeMax!==null)while(hi>lo&&x[hi]>P.rangeMax)hi--;
+  x=x.slice(lo,hi+1);y=y.slice(lo,hi+1);
+  if(x.length<20)throw new Error("fewer than 20 points in the analysis range");
+  const rawNorm=Float64Array.from(y);
+  let sigma=sigmaDiff(y);
+  if(P.sgOn){const r=sgFilter(y,P.sgWin,P.sgOrd);y=r.out;sigma*=r.gain;}
+  const bl=(P.fitMode==="fixed"&&P.regionFit&&P.regionRaw)?{baseline:new Float64Array(x.length),mask:new Uint8Array(x.length),anchors:[],removedAnchors:0}:adaptiveBaseline(x,y,sigma,P);
+  const z=Float64Array.from(y,(v,i)=>v-bl.baseline[i]);
+  let fit=fitSpectrum(x,z,sigma,P,targets);
+  let blUsed=bl;
+  if(fit.regions){
+    const b2=Float64Array.from(bl.baseline,(v,i)=>v+fit.bg[i]);
+    for(let i=0;i<z.length;i++)z[i]=y[i]-b2[i];
+    blUsed={baseline:b2,mask:bl.mask,anchors:bl.anchors.map(a=>({x:a.x,y:a.y+fit.bg[nearestIdx(x,a.x)]})),removedAnchors:bl.removedAnchors};
+    const nr=fit.regions.filter(Boolean).length;notes.push(`fitted in ${nr} region${nr===1?"":"s"} with a ${["constant","linear","quadratic","cubic"][P.regionPoly]} local background`);}
+  else if(P.blRefine&&fit.peaks.length){
+    const cols=splineBasis(x,P.refineWin);
+    fit=fitSpectrum(x,z,sigma,P,targets,{peaks:fit.peaks.map(p=>({...p})),offset:fit.offset,removed:fit.removed,cols});
+    const b2=Float64Array.from(bl.baseline,(v,i)=>v+fit.bg[i]);
+    for(let i=0;i<z.length;i++)z[i]=y[i]-b2[i];
+    blUsed={baseline:b2,mask:bl.mask,anchors:[],removedAnchors:bl.removedAnchors};
+    notes.push("background refined jointly with the peaks");}
+  const matched={};for(const t of targets)matched[t.name]=fit.peaks.find(p=>p.label===t.name)||null;
+  return{x,rawNorm,y,baseline:blUsed.baseline,mask:blUsed.mask,anchors:blUsed.anchors,z,sigma,fit,matched,si,notes,removedAnchors:blUsed.removedAnchors};}
+function nearestIdx(x,v){let k=0,bd=Infinity;for(let i=0;i<x.length;i++){const d=Math.abs(x[i]-v);if(d<bd){bd=d;k=i;}}return k;}
+
+/* ---------------- Monte Carlo uncertainties ---------------- */
+function bandMaxOf(r,name,targets){const p=r.matched[name];const t=targets.find(t=>t.name===name);const pos=p?p.x0:t?t.pos:null;if(pos===null)return null;
+  const zs=movAvg(r.z,5);let m=-Infinity;for(let i=0;i<r.x.length;i++)if(Math.abs(r.x[i]-pos)<=8&&zs[i]>m)m=zs[i];return Number.isFinite(m)?m:null;}
+function ratioValues(r,R,targets){const n=r.matched[R.num],d=r.matched[R.den];const o={};
+  o.area=d?(n?n.area/d.area:0):null;o.height=d?(n?n.A/d.A:0):null;
+  const bn=bandMaxOf(r,R.num,targets),bd=bandMaxOf(r,R.den,targets);o.bandmax=bd&&bd>0?(bn===null?0:bn/bd):null;return o;}
+async function mcErrors(r,P,targets,ratioList,N,label,onTick){
+  const X=r.x;const clean=Float64Array.from(X,(x,i)=>{let v=r.baseline[i];for(const p of r.fit.peaks)v+=lor(x,p.x0,p.w,p.A);return v;});
+  let seed=1;for(const c of label)seed=(seed*31+c.charCodeAt(0))%2147483647;if(seed<=0)seed+=2147483646;
+  const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+  const gauss=()=>{let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+  const acc={},rat={};let ok=0;
+  for(let k=0;k<N;k++){
+    const y=Float64Array.from(clean,v=>v+r.sigma*gauss());
+    try{const q=processOne({power:1,time:1},{name:"mc",x:Float64Array.from(X),y},P,targets);ok++;
+      for(const p of q.fit.peaks){if(!p.label)continue;const a=acc[p.label]||(acc[p.label]={x0:[],w:[],A:[],area:[]});a.x0.push(p.x0);a.w.push(p.w);a.A.push(p.A);a.area.push(p.area);}
+      for(const R of ratioList){const v=ratioValues(q,R,targets);const key=ratioLabel(R);const s=rat[key]||(rat[key]={area:[],height:[],bandmax:[]});for(const b in v)if(v[b]!==null&&Number.isFinite(v[b]))s[b].push(v[b]);}
+    }catch(e){}
+    if(onTick)await onTick(k);}
+  const sd=a=>{if(a.length<3)return NaN;const m=a.reduce((s,x)=>s+x,0)/a.length;return Math.sqrt(a.reduce((s,x)=>s+(x-m)**2,0)/(a.length-1));};
+  for(const p of r.fit.peaks){if(!p.label||!acc[p.label])continue;const a=acc[p.label];
+    p.cov={ex0:p.ex0,ew:p.ew,eA:p.eA,eArea:p.eArea};p.ex0=sd(a.x0);p.ew=sd(a.w);p.eA=sd(a.A);p.eArea=sd(a.area);}
+  const ratioSD={};for(const key in rat){ratioSD[key]={};for(const b in rat[key])ratioSD[key][b]=sd(rat[key][b]);}
+  r.mc={n:ok,ratioSD};}
+async function runAll(){
+  const P=readParams();
+  const pos=v=>Number.isFinite(+v)&&v!==null&&v!==""&&+v>0?+v:null;
+  const targets=peaksDef.filter(p=>p.name&&Number.isFinite(+p.pos)).map(p=>({name:p.name.trim(),pos:+p.pos,tol:pos(p.tol),wmin:pos(p.wmin),wmax:pos(p.wmax)}));
+  const jobs=[];files.forEach(f=>f.spectra.forEach(s=>jobs.push({f,s})));
+  if(!jobs.length)return;
+  $("#runBtn").disabled=true;const prog=$("#prog");prog.style.display="block";
+  results=[];let fails=0;
+  for(let j=0;j<jobs.length;j++){const {f,s}=jobs[j];
+    $("#status").textContent=`Processing ${j+1} of ${jobs.length}: ${f.name} / ${s.name}`;prog.firstElementChild.style.width=`${100*j/jobs.length}%`;
+    await new Promise(r=>setTimeout(r,0));
+    try{const r=processOne(f,s,P,targets);
+      if(P.mcN>0){const rl=ratios.filter(R=>R.num&&R.den);await mcErrors(r,P,targets,rl,P.mcN,`${f.name}|${s.name}`,async k=>{if(k%5===4){$("#status").textContent=`Spectrum ${j+1} of ${jobs.length}: Monte Carlo ${k+1} of ${P.mcN}`;prog.firstElementChild.style.width=`${100*(j+(k+1)/P.mcN)/jobs.length}%`;await new Promise(res=>setTimeout(res,0));}});}
+      results.push({file:f.name,group:f.group,spec:s.name,...r,error:null});}
+    catch(e){fails++;results.push({file:f.name,group:f.group,spec:s.name,error:e.message||String(e)});}}
+  prog.firstElementChild.style.width="100%";
+  results.P=P;results.targets=targets;results.ratios=ratios.filter(r=>r.num&&r.den).map(r=>({...r}));
+  setTimeout(()=>{prog.style.display="none";prog.firstElementChild.style.width="0";},500);
+  $("#status").textContent=`Done. ${jobs.length-fails} spectra processed`+(fails?`, ${fails} failed (see the fit quality table).`:".");
+  $("#runBtn").disabled=false;if(current>=results.length)current=0;renderAll();}
+
+
+/* ---------------- live normalization (applied when displaying and exporting) ---------------- */
+function normSettings(){return{on:$("#normOn").checked,mode:$("#normMode").value,peak:$("#normPeak").value};}
+function nfInfo(r,force){const S=normSettings();if(!S.on&&!force)return{f:1,label:""};
+  const np=r.matched[S.peak];const t=(results.targets||[]).find(t=>t.name===S.peak);
+  if(S.mode==="fit"){if(np&&np.A>0)return{f:np.A,label:`normalized to the fitted ${S.peak} height`};}
+  const pos=np?np.x0:t?t.pos:null;
+  if(pos!==null){const zs=movAvg(r.z,5);let m=-Infinity;for(let i=0;i<r.x.length;i++)if(Math.abs(r.x[i]-pos)<=15&&zs[i]>m)m=zs[i];if(Number.isFinite(m)&&m>0)return{f:m,label:`normalized to the ${S.peak} band maximum`};}
+  return{f:1,label:`not normalized (${S.peak} not found)`};}
+function sview(r,force){const {f,label}=nfInfo(r,force);const key=JSON.stringify(normSettings())+(force?"F":"");
+  if(r._view&&r._view.key===key)return r._view;
+  const sc=a=>Float64Array.from(a,v=>v/f);
+  const map=new Map();const peaks=r.fit.peaks.map(p=>{const q={...p,A:p.A/f,eA:p.eA/f,area:p.area/f,eArea:p.eArea/f};map.set(p,q);return q;});
+  const matched={};for(const k in r.matched)matched[k]=r.matched[k]?map.get(r.matched[k]):null;
+  r._view={key,f,label,y:sc(r.y),rawNorm:sc(r.rawNorm),baseline:sc(r.baseline),z:sc(r.z),anchors:r.anchors.map(a=>({x:a.x,y:a.y/f})),offset:r.fit.offset/f,sigma:r.sigma/f,peaks,matched};
+  return r._view;}
+
+/* ---------------- formatting ---------------- */
+const fmt=(v,d=1)=>v===null||v===undefined||!Number.isFinite(v)?"":v.toFixed(d);
+const fmtSig=v=>!Number.isFinite(v)?"":(Math.abs(v)>=1e5||Math.abs(v)<1e-3)&&v!==0?v.toExponential(3):(+v.toPrecision(4)).toString();
+function vErr(v,e){
+  if(v===null||v===undefined||!Number.isFinite(v))return"";
+  if(!Number.isFinite(e)||e<=0)return fmtSig(v);
+  if(Math.abs(v)>=1e5||(Math.abs(v)<1e-3&&v!==0)){const ex=Math.floor(Math.log10(Math.abs(v)));const m=v/10**ex,me=e/10**ex;return vErr(m,me)+`e${ex}`;}
+  let d=Math.max(0,1-Math.floor(Math.log10(e)));let ed=Math.round(e*10**d);
+  if(ed>=100&&d>0){d--;ed=Math.round(e*10**d);}
+  return`${v.toFixed(d)}(${ed})`;}
+const pmErr=(v,e,d)=>Number.isFinite(e)?`${v.toFixed(d)} ± ${e.toFixed(d)}`:fmt(v,d);
+function bandMax(r,name){const p=r.matched[name];const t=(results.targets||[]).find(t=>t.name===name);const pos=p?p.x0:t?t.pos:null;if(pos===null)return null;
+  const zs=movAvg(r.z,5);let m=-Infinity;for(let i=0;i<r.x.length;i++)if(Math.abs(r.x[i]-pos)<=8&&zs[i]>m)m=zs[i];return Number.isFinite(m)?m:null;}
+function ratioOf(r,R){const basis=results.P.ratioBasis;
+  if(basis==="bandmax"){const n=bandMax(r,R.num),d=bandMax(r,R.den);if(!d||d<=0)return{v:null,e:null};if(n===null)return{v:0,e:null};const s=r.sigma/Math.sqrt(5);const v=n/d;let e=Math.abs(v)*Math.sqrt((s/n)**2+(s/d)**2);if(r.mc){const m=(r.mc.ratioSD[ratioLabel(R)]||{}).bandmax;if(Number.isFinite(m))e=m;}return{v,e};}
+  const q=ratioWithErr(r.fit,r.matched[R.num],r.matched[R.den],basis);
+  if(r.mc){const s=(r.mc.ratioSD[ratioLabel(R)]||{})[basis];if(Number.isFinite(s))q.e=s;}
+  return q;}
+function ratioLabel(R){return R.label&&R.label.trim()?R.label:`${R.num}/${R.den}`;}
+function okResults(group){return results.filter(r=>!r.error&&(!group||group==="__all"||r.group===group));}
+function colLabel(r,multiGroup){return multiGroup?`${r.group}: ${r.spec}`:r.spec;}
+function cssv(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+function groupColor(i){return cssv(`--g${(i%6)+1}`);}
+
+/* ---------------- rendering ---------------- */
+function renderAll(){
+  const ok=results.length>0;
+  $("#viewerEmpty").style.display=ok?"none":"block";$("#viewer").style.display=ok?"block":"none";
+  ["#cmpPanel","#summaryPanel","#resultsPanel"].forEach(s=>$(s).style.display=ok?"block":"none");
+  if(!ok)return;
+  const groups=[...new Set(results.map(r=>r.group))];
+  const gopts=`<option value="__all">All groups</option>`+groups.map(g=>`<option value="${esc(g)}">${esc(g)}</option>`).join("");
+  ["#cmpGroup","#ovGroup"].forEach(s=>{const el=$(s),prev=el.value;el.innerHTML=gopts;if([...el.options].some(o=>o.value===prev))el.value=prev;});
+  $("#specSel").innerHTML=results.map((r,i)=>`<option value="${i}">${esc(r.group)} / ${esc(r.spec)}${r.error?" (failed)":""}</option>`).join("");
+  renderView();renderComparison();renderSummary();renderResults();}
+function renderView(){
+  $("#vSingle").setAttribute("aria-pressed",view==="single");$("#vOverlay").setAttribute("aria-pressed",view==="overlay");
+  $("#singleView").style.display=view==="single"?"block":"none";$("#overlayView").style.display=view==="overlay"?"block":"none";
+  if(view==="single")renderSpectrum();else renderOverlay();}
+function plotLayoutBase(){const ink=cssv("--ink"),muted=cssv("--muted"),line=cssv("--line");const ax={gridcolor:line,zerolinecolor:line,color:muted,linecolor:line};
+  return{ax,layout:{paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",font:{family:cssv("--font"),color:ink,size:12},margin:{l:58,r:12,t:10,b:44},legend:{orientation:"h",y:1.1,x:0,font:{size:11}}}};}
+function renderSpectrum(){
+  const r=results[current];if(!r)return;$("#specSel").value=current;
+  const plot=$("#plot");
+  if(r.error){if(window.Plotly)Plotly.purge(plot);plot.innerHTML=`<div class="empty"><strong>This spectrum could not be processed</strong>${esc(r.error)}</div>`;$("#specPeaks").innerHTML="";$("#specLog").textContent="";return;}
+  const V=sview(r);
+  if(!window.Plotly){plot.innerHTML=`<div class="empty"><strong>Plotting library did not load</strong>Results are still in the tables.</div>`;}
+  else{
+    if(plot.querySelector(".empty"))plot.innerHTML="";
+    const acc=cssv("--accent"),base=cssv("--base"),rawc=cssv("--raw"),maskc=cssv("--maskc"),comp=cssv("--comp"),ink=cssv("--ink"),okc=cssv("--ok");
+    const X=Array.from(r.x);
+    const regs=r.fit.regions?r.fit.regions.map((g,i)=>g?{...g,i}:null).filter(Boolean):null;
+    const inRegion=(xv,p)=>!regs||(xv>=r.fit.regions[p.region].lo&&xv<=r.fit.regions[p.region].hi);
+    const fitTot=X.map(xv=>{if(regs){const g=regs.find(g=>xv>=g.lo&&xv<=g.hi);if(!g)return null;let m=0;for(const p of V.peaks)if(p.region===g.i)m+=lor(xv,p.x0,p.w,p.A);return m;}let m=V.offset;for(const p of V.peaks)m+=lor(xv,p.x0,p.w,p.A);return m;});
+    const traces=[
+      {x:X,y:Array.from(V.y),name:"Spectrum",type:"scatter",mode:"lines",line:{color:rawc,width:1.2},yaxis:"y"},
+      {x:X,y:Array.from(V.baseline),name:"Background",type:"scatter",mode:"lines",line:{color:base,width:2},yaxis:"y"}];
+    if(V.anchors.length&&!r.fit.bg)traces.push({x:V.anchors.map(a=>a.x),y:V.anchors.map(a=>a.y),name:"Anchors",type:"scatter",mode:"markers",marker:{color:base,size:6,symbol:"circle-open",line:{width:1.5}},yaxis:"y"});
+    traces.push({x:X,y:Array.from(V.z),name:"Corrected",type:"scatter",mode:"lines",line:{color:rawc,width:1},yaxis:"y2"});
+    V.peaks.forEach(p=>{const xs=X.filter(xv=>inRegion(xv,p));traces.push({x:xs,y:xs.map(xv=>lor(xv,p.x0,p.w,p.A)+(regs?0:V.offset)),type:"scatter",mode:"lines",line:{color:comp,width:1.1},showlegend:false,name:p.label||p.x0.toFixed(0),hovertemplate:`${esc(p.label||"unnamed")} %{x:.1f}<extra></extra>`,yaxis:"y2"});});
+    traces.push({x:X,y:fitTot,name:"Fit",type:"scatter",mode:"lines",line:{color:acc,width:1.8},connectgaps:false,yaxis:"y2"});
+    let zmax=0;for(const v of V.z)zmax=Math.max(zmax,v);
+    if($("#showResid").checked){const off=-0.12*zmax;traces.push({x:X,y:X.map((xv,i)=>fitTot[i]===null?null:V.z[i]-fitTot[i]+off),name:"Residual (shifted down)",type:"scatter",mode:"lines",line:{color:okc,width:0.9},connectgaps:false,yaxis:"y2"});}
+    const shapes=[];
+    if(regs)regs.forEach(g=>shapes.push({type:"rect",xref:"x",yref:"y2 domain",x0:g.lo,x1:g.hi,y0:0,y1:1,fillcolor:maskc,line:{width:0},layer:"below"}));
+    else{let i=0;const n=r.mask.length;while(i<n){if(r.mask[i]){let j=i;while(j<n&&r.mask[j])j++;shapes.push({type:"rect",xref:"x",yref:"y domain",x0:r.x[i],x1:r.x[j-1],y0:0,y1:1,fillcolor:maskc,line:{width:0},layer:"below"});i=j;}else i++;}}
+    const big=V.peaks.filter(p=>p.label).sort((a,b)=>b.A-a.A);
+    const ann=V.peaks.filter(p=>p.label&&p.A>=0.08*(big[0]?big[0].A:0)).map(p=>({x:p.x0,y:p.A+(regs?0:V.offset),xref:"x",yref:"y2",text:esc(p.label),showarrow:false,yshift:10,font:{color:ink,size:10.5}}));
+    const {ax,layout}=plotLayoutBase();
+    Plotly.react(plot,traces,{...layout,showlegend:true,xaxis:{...ax,title:{text:"Raman shift (cm⁻¹)"},anchor:"y2"},yaxis:{...ax,domain:[0.54,1],title:{text:V.f!==1?"Norm. intensity":"Intensity"}},yaxis2:{...ax,domain:[0,0.46],title:{text:"Corrected"}},shapes,annotations:ann,hovermode:"x unified"},{responsive:true,displaylogo:false,modeBarButtonsToRemove:["lasso2d","select2d"]});}
+  $("#specPeaks").innerHTML=V.peaks.length?V.peaks.map(p=>`<tr><td>${p.label?esc(p.label):"unnamed"}</td><td class="num">${vErr(p.x0,p.ex0)}</td><td class="num">${vErr(p.w,p.ew)}</td><td class="num">${vErr(p.A,p.eA)}</td><td class="num">${vErr(p.area,p.eArea)}</td><td>${p.flag?`<span class="tag warn">${esc(p.flag)}</span>`:""}</td></tr>`).join(""):`<tr><td colspan="6">No peaks in the fit.</td></tr>`;
+  const parts=[];
+  if(r.si.ok)parts.push(`Si found at ${r.si.x0.toFixed(2)} cm⁻¹, axis shifted by ${r.si.shift>=0?"+":""}${r.si.shift.toFixed(2)} cm⁻¹`);
+  parts.push(`noise σ ${fmtSig(V.sigma)}`,`fit RMSE/σ ${fmt(r.fit.rmseSigma,2)}`);parts.push(r.mc?`uncertainties from ${r.mc.n} Monte Carlo replicas`:"uncertainties from the fit covariance");
+  if(r.fit.regions)parts.push("RMSE/σ by region: "+r.fit.regions.filter(Boolean).map(g=>`${g.lo.toFixed(0)} to ${g.hi.toFixed(0)} cm⁻¹ ${g.rmse.toFixed(2)}`).join(", "));
+  if(V.label)parts.push(V.label);
+  results.ratios.forEach(R=>{const q=ratioOf(r,R);if(q.v!==null)parts.push(`${ratioLabel(R)} = ${vErr(q.v,q.e)}`);});
+  if(r.notes.length)parts.push(...r.notes);
+  const missing=results.targets.filter(t=>!r.matched[t.name]).map(t=>t.name);if(missing.length)parts.push(`not in fit: ${missing.join(", ")}`);
+  if(r.fit.removed.length)parts.push(`removed in refit: ${r.fit.removed.join(", ")}`);
+  $("#specLog").textContent=parts.join(". ")+".";}
+function interp(xs,ys,xq){const out=new Float64Array(xq.length);let k=0;for(let i=0;i<xq.length;i++){const v=xq[i];if(v<=xs[0]){out[i]=NaN;continue;}if(v>=xs[xs.length-1]){out[i]=NaN;continue;}while(k<xs.length-2&&xs[k+1]<v)k++;while(k>0&&xs[k]>v)k--;const t=(v-xs[k])/(xs[k+1]-xs[k]);out[i]=ys[k]+(ys[k+1]-ys[k])*t;}return out;}
+function renderOverlay(){
+  const el=$("#ovplot");if(!window.Plotly){el.innerHTML=`<div class="empty"><strong>Plotting library did not load</strong></div>`;return;}
+  const sel=$("#ovGroup").value||"__all";const showInd=$("#ovInd").checked;
+  const groups=[...new Set(results.map(r=>r.group))];const traces=[];const P=results.P;
+  const normName=$("#normPeak").value||"G1";
+  groups.forEach((g,gi)=>{if(sel!=="__all"&&sel!==g)return;const rs=okResults(g);if(!rs.length)return;const col=groupColor(gi);
+    const scaled=rs.map(r=>{const V=sview(r,true);return{x:r.x,y:V.z,r};});
+    if(showInd)scaled.forEach(s=>traces.push({x:Array.from(s.x),y:Array.from(s.y),type:"scatter",mode:"lines",line:{color:col,width:1},opacity:0.3,showlegend:false,name:`${g}: ${s.r.spec}`,hovertemplate:`${esc(g)}: ${esc(s.r.spec)}<extra></extra>`}));
+    const gx=scaled[0].x;const acc=new Float64Array(gx.length),cnt=new Float64Array(gx.length);
+    scaled.forEach(s=>{const yi=interp(s.x,s.y,gx);for(let i=0;i<gx.length;i++)if(Number.isFinite(yi[i])){acc[i]+=yi[i];cnt[i]++;}});
+    traces.push({x:Array.from(gx),y:Array.from(acc,(v,i)=>cnt[i]?v/cnt[i]:null),type:"scatter",mode:"lines",line:{color:col,width:2.2},name:`${g} (mean of ${rs.length})`});});
+  const {ax,layout}=plotLayoutBase();
+  Plotly.react(el,traces,{...layout,showlegend:true,xaxis:{...ax,title:{text:"Raman shift (cm⁻¹)"}},yaxis:{...ax,title:{text:`Normalized to ${normName}`}},hovermode:"closest"},{responsive:true,displaylogo:false,modeBarButtonsToRemove:["lasso2d","select2d"]});}
+function cmpData(){
+  const sel=$("#cmpGroup").value||"__all";const rs=okResults(sel);const multi=sel==="__all"&&new Set(rs.map(r=>r.group)).size>1;
+  const T=results.targets;const blocks=[["Raman shift (cm⁻¹)",p=>[p.x0,p.ex0]],["FWHM (cm⁻¹)",p=>[p.w,p.ew]],["Area",p=>[p.area,p.eArea]]];
+  if($("#cmpHeight").checked)blocks.push(["Height",p=>[p.A,p.eA]]);
+  return{rs,multi,T,blocks};}
+function renderComparison(){
+  const {rs,multi,T,blocks}=cmpData();
+  if(!rs.length){$("#cmpTable").innerHTML=`<tbody><tr><td>No processed spectra in this selection.</td></tr></tbody>`;$("#ratioTable").innerHTML="";return;}
+  let h=`<thead><tr><th rowspan="2">Peak</th>`+blocks.map(b=>`<th class="block" colspan="${rs.length}">${esc(b[0])}</th>`).join("")+`</tr><tr>`;
+  blocks.forEach(()=>rs.forEach((r,i)=>h+=`<th class="num${i===0?" bl":""}">${esc(colLabel(r,multi))}</th>`));
+  h+=`</tr></thead><tbody>`;
+  T.forEach(t=>{h+=`<tr><td>${esc(t.name)}</td>`;blocks.forEach(b=>rs.forEach((r,i)=>{const p=sview(r).matched[t.name];let cell="";if(p){const [v,e]=b[1](p);cell=vErr(v,e);if(p.flag)cell+=" *";}h+=`<td class="num${i===0?" bl":""}">${cell||"–"}</td>`;}));h+=`</tr>`;});
+  $("#cmpTable").innerHTML=h+`</tbody>`;
+  let g=`<thead><tr><th>Ratio (${{height:"fitted heights",area:"areas",bandmax:"band maxima"}[results.P.ratioBasis]})</th>`+rs.map(r=>`<th class="num">${esc(colLabel(r,multi))}</th>`).join("")+`</tr></thead><tbody>`;
+  results.ratios.forEach(R=>{g+=`<tr><td>${esc(ratioLabel(R))}</td>`+rs.map(r=>{const q=ratioOf(r,R);return`<td class="num">${q.v===null?"–":vErr(q.v,q.e)}</td>`;}).join("")+`</tr>`;});
+  $("#ratioTable").innerHTML=g+`</tbody>`;}
+function stats(a){const v=a.filter(Number.isFinite);if(!v.length)return null;const m=v.reduce((s,x)=>s+x,0)/v.length;const sd=v.length>1?Math.sqrt(v.reduce((s,x)=>s+(x-m)**2,0)/(v.length-1)):0;return{m,sd,n:v.length};}
+const ms=(s,d)=>s?`${s.m.toFixed(d)} ± ${s.sd.toFixed(d)}`:"";
+function summaryRows(){
+  const T=results.targets,groups=[...new Set(results.map(r=>r.group))];
+  return groups.map(g=>{const rs=okResults(g);const row={group:g,n:rs.length,peaks:{},ratios:{}};
+    T.forEach(t=>{const ps=rs.map(r=>sview(r).matched[t.name]).filter(Boolean);row.peaks[t.name]={n:ps.length,pos:stats(ps.map(p=>p.x0)),w:stats(ps.map(p=>p.w)),area:stats(ps.map(p=>p.area))};});
+    results.ratios.forEach(R=>{row.ratios[ratioLabel(R)]=stats(rs.map(r=>ratioOf(r,R).v).filter(v=>v!==null));});return row;});}
+function renderSummary(){
+  const T=results.targets,rows=summaryRows();
+  let h=`<thead><tr><th>Group</th><th class="num">n</th>`+results.ratios.map(R=>`<th class="num">${esc(ratioLabel(R))}</th>`).join("")+T.map(t=>`<th class="num bl">${esc(t.name)} pos</th><th class="num">${esc(t.name)} FWHM</th>`).join("")+`</tr></thead><tbody>`;
+  rows.forEach(r=>{h+=`<tr><td>${esc(r.group)}</td><td class="num">${r.n}</td>`+results.ratios.map(R=>`<td class="num">${ms(r.ratios[ratioLabel(R)],3)}</td>`).join("")+T.map(t=>{const p=r.peaks[t.name];return`<td class="num bl">${ms(p.pos,2)}</td><td class="num">${ms(p.w,1)}</td>`;}).join("")+`</tr>`;});
+  $("#summaryTable").innerHTML=h+`</tbody>`;}
+function renderResults(){
+  let h=`<thead><tr><th>Group</th><th>Spectrum</th><th>File</th><th class="num">Si shift (cm⁻¹)</th><th class="num">Noise σ</th><th class="num">RMSE/σ</th><th>Notes</th></tr></thead><tbody>`;
+  results.forEach((r,i)=>{if(r.error){h+=`<tr><td>${esc(r.group)}</td><td>${esc(r.spec)}</td><td>${esc(r.file)}</td><td colspan="4"><span class="tag warn">failed</span> ${esc(r.error)}</td></tr>`;return;}
+    const flags=r.fit.peaks.filter(p=>p.flag).map(p=>`${p.label}: ${p.flag}`);
+    const q=r.fit.rmseSigma;const tag=q<1.5?'<span class="tag ok">good fit</span>':q<3?'<span class="tag">check fit</span>':'<span class="tag warn">poor fit</span>';
+    h+=`<tr><td>${esc(r.group)}</td><td><button class="link" data-i="${i}">${esc(r.spec)}</button></td><td>${esc(r.file)}</td><td class="num">${r.si.ok?(r.si.shift>=0?"+":"")+r.si.shift.toFixed(2):"–"}</td><td class="num">${fmtSig(r.sigma)}</td><td class="num">${fmt(q,2)}</td><td>${tag} ${esc([...r.notes,...flags].join("; "))}</td></tr>`;});
+  $("#resultsTable").innerHTML=h+`</tbody>`;
+  $("#resultsTable").querySelectorAll("button[data-i]").forEach(b=>b.addEventListener("click",()=>{current=+b.dataset.i;view="single";renderView();$("#viewer").scrollIntoView({behavior:"smooth",block:"start"});}));}
+
+/* ---------------- exports ---------------- */
+const csvCell=v=>{if(v===null||v===undefined)return"";if(typeof v==="number")return Number.isFinite(v)?String(+v.toPrecision(8)):"";const s=String(v);return/[",\n\t]/.test(s)?`"${s.replace(/"/g,'""')}"`:s;};
+const csv=rows=>rows.map(r=>r.map(csvCell).join(",")).join("\n");
+function cmpRows(){const {rs,multi,T,blocks}=cmpData();const head1=["Peak"],head2=[""];
+  blocks.forEach(b=>rs.forEach((r,i)=>{head1.push(i===0?b[0]:"");head2.push(colLabel(r,multi));}));
+  const rows=[head1,head2];
+  T.forEach(t=>{const row=[t.name];blocks.forEach(b=>rs.forEach(r=>{const p=sview(r).matched[t.name];row.push(p?vErr(...b[1](p))+(p.flag?" *":""):"");}));rows.push(row);});
+  rows.push([]);rows.push([`Ratio (${results.P.ratioBasis})`,...rs.map(r=>colLabel(r,multi))]);
+  results.ratios.forEach(R=>rows.push([ratioLabel(R),...rs.map(r=>{const q=ratioOf(r,R);return q.v===null?"":vErr(q.v,q.e);})]));
+  rows.push([]);rows.push(["Standard errors in parentheses refer to the last digits. * marks a weak or limit-bound peak."]);
+  return rows;}
+function peaksCSV(){const rows=[["group","file","spectrum","peak","position","position_err","fwhm","fwhm_err","height","height_err","area","area_err","flag","si_shift","normalization","error_method"]];
+  okResults().forEach(r=>{const V=sview(r);V.peaks.forEach(p=>rows.push([r.group,r.file,r.spec,p.label||"unnamed",p.x0,p.ex0,p.w,p.ew,p.A,p.eA,p.area,p.eArea,p.flag||"",r.si.ok?r.si.shift:null,V.label,r.mc?`Monte Carlo (${r.mc.n})`:"fit covariance"]));});return csv(rows);}
+function ratiosCSV(){const head=["group","file","spectrum"];results.ratios.forEach(R=>head.push(ratioLabel(R),ratioLabel(R)+"_err"));head.push("ratio_basis","si_found_at","si_shift","noise_sigma","fit_rmse_over_sigma","notes","error");
+  const rows=[head];results.forEach(r=>{if(r.error){rows.push([r.group,r.file,r.spec,...Array(head.length-4).fill(""),r.error]);return;}const row=[r.group,r.file,r.spec];results.ratios.forEach(R=>{const q=ratioOf(r,R);row.push(q.v,q.e);});
+    row.push(results.P.ratioBasis,r.si.ok?r.si.x0:null,r.si.ok?r.si.shift:null,sview(r).sigma,r.fit.rmseSigma,r.notes.join("; "),"");rows.push(row);});return csv(rows);}
+function summaryCSV(){const T=results.targets,rows=summaryRows();const head=["group","n"];results.ratios.forEach(R=>head.push(`${ratioLabel(R)}_mean`,`${ratioLabel(R)}_sd`));
+  T.forEach(t=>head.push(`${t.name}_n`,`${t.name}_pos_mean`,`${t.name}_pos_sd`,`${t.name}_fwhm_mean`,`${t.name}_fwhm_sd`,`${t.name}_area_mean`,`${t.name}_area_sd`));const out=[head];
+  rows.forEach(r=>{const row=[r.group,r.n];results.ratios.forEach(R=>{const s=r.ratios[ratioLabel(R)];row.push(s?.m,s?.sd);});T.forEach(t=>{const p=r.peaks[t.name];row.push(p.n,p.pos?.m,p.pos?.sd,p.w?.m,p.w?.sd,p.area?.m,p.area?.sd);});out.push(row);});return csv(out);}
+function spectraCSV(){const rows=[["group","file","spectrum","raman_shift_calibrated","normalized","processed","baseline","corrected","fit"]];
+  okResults().forEach(r=>{const V=sview(r);const regs=r.fit.regions;for(let i=0;i<r.x.length;i++){const xv=r.x[i];let m=regs?null:V.offset;
+    if(regs){const gi=regs.findIndex(g=>g&&xv>=g.lo&&xv<=g.hi);if(gi>=0){m=0;for(const p of V.peaks)if(p.region===gi)m+=lor(xv,p.x0,p.w,p.A);}}else for(const p of V.peaks)m+=lor(xv,p.x0,p.w,p.A);
+    rows.push([r.group,r.file,r.spec,xv,V.rawNorm[i],V.y[i],V.baseline[i],V.z[i],m]);}});return csv(rows);}
+function methodsMD(){const P=results.P,T=results.targets,S=normSettings();const d=new Date().toISOString().slice(0,10);
+  const polyName=["constant","linear","quadratic","cubic"][P.regionPoly];
+  const model=P.fitMode==="fixed"
+    ?(P.regionFit
+      ?`Fixed peak model, fitted separately in spectral regions as in Yumigeta et al. (Fig. S3). Listed peaks closer than ${P.regionGap} cm⁻¹ were grouped, and each region spans ${P.regionPad} cm⁻¹ beyond its outermost peaks. In each region all Lorentzians were fitted simultaneously with a ${polyName} local background${P.regionRaw?" directly on the calibrated spectrum (no global baseline)":" on the spectrum after the adaptive baseline"}, starting from ${P.nStarts} different initial guesses (the first from the listed start values, the others randomized within each peak's bounds), keeping the solution with the lowest residual.`
+      :`Fixed peak model fitted over the whole spectrum${P.blRefine?`, with a cubic B-spline background (knots every ${P.refineWin} cm⁻¹) fitted jointly with the peaks`:""}.`)
+    :`Adaptive model (automatic detection at ${P.detK}σ prominence plus listed peaks; peaks with amplitude below ${P.detK}σ, nested peaks or limit-bound peaks removed and the model refitted)${P.blRefine?`, followed by a joint fit with a cubic B-spline background (knots every ${P.refineWin} cm⁻¹)`:""}.`;
+  return `# Raman processing methods and settings
+
+Generated ${d} with Raman peak extractor for graphene nanoribbon spectra (v${APP_VERSION}).
+
+## Steps
+
+1. Intensity divided by laser power (mW) × integration time (s).
+2. Bad CCD pixels: ${P.badPix.length?P.badPix.join(", ")+" cm⁻¹ interpolated":"none"}. Cosmic-ray removal: ${P.despikeOn?`on, ${P.spikeThr}σ above a 9-pixel running median, 1 to 2 pixel excursions whose neighbors stay below 25% of their height`:"off"}.
+3. Si calibration: ${P.siOn?`Lorentzian plus linear background fitted to the Si peak within ±${P.siWin} cm⁻¹ of ${P.siRef} cm⁻¹, and the Raman shift axis of each spectrum offset so the fitted Si position equals ${P.siRef} cm⁻¹`:"off"}.
+4. Analysis range: ${P.rangeMin??"start of data"} to ${P.rangeMax??"end of data"} cm⁻¹ (calibrated axis).
+5. Savitzky-Golay smoothing: ${P.sgOn?`window ${P.sgWin} points, order ${P.sgOrd} (smoothing makes the standard errors underestimates)`:"off"}.
+6. Noise σ from the median absolute deviation of first differences.
+7. ${P.fitMode==="fixed"&&P.regionFit&&P.regionRaw?"No global baseline (background handled locally in each fit region).":`Adaptive baseline following Lüthi et al. (Empa): lower envelope window ${P.blWin} cm⁻¹, peak mask threshold ${P.maskK}σ, minimum structured width ${P.minPW} cm⁻¹, mask margin ${P.maskMargin} cm⁻¹, anchor spacing ${P.anchorSp} cm⁻¹, anchors above the smoothed baseline removed iteratively, baseline shifted ${P.blShift}σ below the signal.`}
+8. Peak fitting: ${model} Each Lorentzian was constrained to its position window and FWHM range (below). Optimization used a coordinate grid search with non-negative amplitudes followed by Levenberg-Marquardt refinement.
+9. Uncertainties: ${P.mcN>0?`Monte Carlo of the complete pipeline. For each spectrum, ${P.mcN} synthetic spectra were generated from its fitted model (background plus all Lorentzians) with added Gaussian noise of the measured σ, each was processed identically (despiking, Si calibration, baseline, fitting), and the standard deviation of each parameter and ratio across replicas is reported. The random seed is fixed per spectrum, so results are reproducible.`:`standard errors from the covariance matrix (JᵀJ)⁻¹ scaled by the residual variance, with area errors including the amplitude and width covariance and ratio errors propagated with the full covariance within a region (regions treated as independent).`}
+10. Normalization: ${S.on?(S.mode==="fit"?`heights and areas divided by the fitted height of ${S.peak}`:`spectra, heights and areas divided by the maximum of the corrected spectrum within ±15 cm⁻¹ of ${S.peak}`):"none"}. Ratios computed from ${{height:"fitted peak heights",area:"integrated peak areas",bandmax:"maxima of the corrected spectrum within ±8 cm⁻¹ of each peak (independent of the peak decomposition)"}[P.ratioBasis]} and do not depend on normalization.
+
+## Peak model
+
+| Peak | Start (cm⁻¹) | Position window (± cm⁻¹) | FWHM range (cm⁻¹) |
+|---|---|---|---|
+${T.map(t=>`| ${t.name} | ${t.pos} | ${t.tol??P.posTol} | ${t.wmin??P.wMin} to ${t.wmax??P.wMax} |`).join("\n")}
+
+## Ratios
+
+${results.ratios.map(R=>`- ${ratioLabel(R)} = ${R.num} / ${R.den}`).join("\n")}
+
+## Data
+
+${files.map(f=>`- ${f.name}: group ${f.group}, ${f.spectra.length} spectra, ${f.power} mW, ${f.time} s`).join("\n")}
+`;}
+function showModal(title,text,hint){$("#modalTitle").textContent=title;$("#modalHint").textContent=hint;$("#modalText").value=text;$("#modal").classList.add("open");$("#modalText").focus();}
+/* standard browser download; skipped inside embedded frames, where downloads are often blocked */
+const inFrame=(()=>{try{return window.self!==window.top;}catch(e){return true;}})();
+function browserDownload(name,text){
+  try{const type=/\.csv$/i.test(name)?"text/csv;charset=utf-8":/\.md$/i.test(name)?"text/markdown;charset=utf-8":"text/plain;charset=utf-8";
+    const url=URL.createObjectURL(new Blob([text],{type}));
+    const a=document.createElement("a");a.href=url;a.download=name;a.style.display="none";document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},2000);return true;}
+  catch(e){return false;}}
+async function saveFile(name,text){
+  if(downloads){try{await downloads.save({filename:name,data:text});toast(`Saved ${name}`);return;}catch(e){const c=e&&e.code;if(c==="declined"){toast("Save cancelled");return;}if(c==="rate_limited"){toast("A save prompt is already open");return;}}}
+  if(!inFrame&&browserDownload(name,text)){toast(`Saved ${name}`);return;}
+  showModal(name,text,"Saving files is not available in this view. Copy the text below and paste it into a file.");}
+async function copyText(text,label){try{await navigator.clipboard.writeText(text);toast(`${label} copied`);}catch(e){showModal(label,text,"Copy the text below, then paste it into Word or Excel.");}}
+
+/* ---------------- file, peak and ratio UI ---------------- */
+function renderFiles(){
+  $("#fileTableWrap").style.display=files.length?"block":"none";
+  $("#fileRows").innerHTML=files.map(f=>`<tr data-id="${f.id}"><td title="${esc(f.name)}" style="max-width:110px;overflow:hidden;text-overflow:ellipsis">${esc(f.name)}</td><td class="num">${f.spectra.length}</td>
+   <td><input data-k="group" value="${esc(f.group)}" aria-label="Group for ${esc(f.name)}" style="min-width:90px"></td><td><input data-k="power" type="number" value="${f.power}" style="width:54px" aria-label="Laser power in mW"></td><td><input data-k="time" type="number" value="${f.time}" style="width:50px" aria-label="Integration time in s"></td><td><button class="peakdel" data-del="${f.id}" aria-label="Remove ${esc(f.name)}">✕</button></td></tr>`).join("");
+  $("#fileRows").querySelectorAll("input").forEach(inp=>inp.addEventListener("change",()=>{const f=files.find(f=>f.id==inp.closest("tr").dataset.id);const k=inp.dataset.k;f[k]=k==="group"?inp.value.trim()||f.name:parseFloat(inp.value)||1;markStale();}));
+  $("#fileRows").querySelectorAll("button[data-del]").forEach(b=>b.addEventListener("click",()=>{files=files.filter(f=>f.id!=b.dataset.del);renderFiles();markStale();}));
+  const n=files.reduce((s,f)=>s+f.spectra.length,0);
+  $("#runBtn").disabled=!n;$("#runBtn").textContent=n?`Process ${n} spectr${n===1?"um":"a"}`:"Process all spectra";
+  if(!results.length)$("#status").textContent=n?"Ready. Check the peak model and settings, then process.":"Load spectra to begin.";}
+function markStale(){if(results.length)$("#status").textContent="Inputs changed. Process again to update results.";saveLocal();}
+function renderModeHelp(){const fixed=$("#fitMode").value==="fixed";$("#regionFitWrap").style.display=fixed?"flex":"none";$("#modeHelp").textContent=fixed?"Every listed peak is fitted, including small shoulders, within its position window and FWHM range. Weak or limit-bound peaks are kept and flagged.":"Peaks are found automatically. Listed peaks are only labels, and weak, nested or limit-bound peaks are removed.";}
+function renderPeaks(){
+  const cell=(i,k,v,w,step,ph)=>`<input data-i="${i}" data-k="${k}" type="number" step="${step}" value="${v??""}" placeholder="${ph||""}" aria-label="${k}" style="width:${w}px">`;
+  $("#peakRows").innerHTML=peaksDef.map((p,i)=>`<tr><td><input data-i="${i}" data-k="name" value="${esc(p.name)}" aria-label="Peak name" style="width:118px"></td><td>${cell(i,"pos",p.pos,64,0.1)}</td><td>${cell(i,"tol",p.tol,42,1,"def.")}</td><td>${cell(i,"wmin",p.wmin,44,1,"def.")}</td><td>${cell(i,"wmax",p.wmax,44,1,"def.")}</td><td><button class="peakdel" data-del="${i}" aria-label="Remove ${esc(p.name)}">✕</button></td></tr>`).join("");
+  $("#peakRows").querySelectorAll("input").forEach(inp=>inp.addEventListener("change",()=>{const p=peaksDef[+inp.dataset.i];const k=inp.dataset.k;if(k==="name"){const old=p.name;p.name=inp.value.trim();ratios.forEach(R=>{if(R.num===old)R.num=p.name;if(R.den===old)R.den=p.name;});}else{const v=parseFloat(inp.value);p[k]=Number.isFinite(v)?v:null;}renderPeakSelects();markStale();}));
+  $("#peakRows").querySelectorAll("button[data-del]").forEach(b=>b.addEventListener("click",()=>{peaksDef.splice(+b.dataset.del,1);renderPeaks();markStale();}));
+  renderPeakSelects();}
+function renderPeakSelects(){
+  const names=peaksDef.map(p=>p.name).filter(Boolean);
+  const opts=sel=>names.map(n=>`<option ${n===sel?"selected":""}>${esc(n)}</option>`).join("");
+  const np=$("#normPeak").value||loadLocal.normPeak||(names.includes("G1")?"G1":names.includes("G")?"G":names[0]);$("#normPeak").innerHTML=opts(names.includes(np)?np:(names.includes("G1")?"G1":names[0]));
+  $("#ratioRows").innerHTML=ratios.map((R,i)=>`<div class="ratiorow"><select data-i="${i}" data-k="num" aria-label="Ratio numerator">${opts(R.num)}</select><span>/</span><select data-i="${i}" data-k="den" aria-label="Ratio denominator">${opts(R.den)}</select><button class="peakdel" data-del="${i}" aria-label="Remove ratio">✕</button><input data-i="${i}" data-k="label" value="${esc(R.label||"")}" placeholder="Label, for example I_D/I_G" aria-label="Ratio label" style="grid-column:1/-1"></div>`).join("");
+  $("#ratioRows").querySelectorAll("select,input").forEach(el=>el.addEventListener("change",()=>{ratios[+el.dataset.i][el.dataset.k]=el.value;saveLocal();if(results.length){results.ratios=ratios.filter(r=>r.num&&r.den).map(r=>({...r}));renderAll();}}));
+  $("#ratioRows").querySelectorAll("button[data-del]").forEach(b=>b.addEventListener("click",()=>{ratios.splice(+b.dataset.del,1);renderPeakSelects();saveLocal();if(results.length){results.ratios=ratios.map(r=>({...r}));renderAll();}}));}
+async function addFiles(list){
+  const orient=$("#orient").value;let added=0;const errs=[];
+  for(const file of list){try{const text=await file.text();const spectra=parseText(text,file.name,orient);
+      files.push({id:++fileSeq,name:file.name,group:file.name.replace(/\.[^.]+$/,""),power:1,time:1,spectra});added+=spectra.length;}
+    catch(e){errs.push(`${file.name}: ${e.message}`);}}
+  renderFiles();markStale();
+  if(errs.length)$("#status").textContent=`Could not read ${errs.join(". ")}. Check that the first column (or row) is Raman shift.`;
+  else if(added)toast(`Loaded ${added} spectr${added===1?"um":"a"}`);}
+/* simulated example: spectra built from the fit values published in Yumigeta et al. (Tables S1 and S2) */
+const DEMO={"As-fabricated":[
+  [[311.654,17.52,1.553],[1233.61,28.01,8.45],[1254.76,35.8,4.49],[1335.22,16.67,3.194],[1385.8,23.7,0.299],[1557.28,24.2,0.457],[1583.5,20.4,0.64],[1596.952,12.93,5.805]],
+  [[311.878,17.51,1.499],[1233.69,28.79,8.66],[1255.9,34.61,3.87],[1335.216,17.34,3.196],[1386.49,26.9,0.405],[1556.61,24.5,0.441],[1584.9,21.7,0.75],[1597.036,13.02,5.52]],
+  [[311.685,18.38,1.757],[1233.14,27.33,8.73],[1253.86,36.85,5.27],[1335.26,16.82,3.49],[1387.55,29.2,0.544],[1557.8,24.5,0.499],[1584.08,19.5,0.63],[1596.979,13.06,6.49]]],
+ "After irradiation":[
+  [[308.93,16.22,3.84],[1234.35,34.73,34.2],[1257.69,45.4,19.4],[1334.875,23.35,17.84],[1376.59,33.8,2.5],[1556.6,34.8,2.57],[1581.02,22.6,6.0],[1596.13,16.35,23.77]],
+  [[306.66,18.7,3.97],[1237.43,43.78,53.9],[1263.7,53.4,23.2],[1335.313,27.7,29.31],[1378.5,50.2,6.43],[1554.5,29.3,2.15],[1580.56,25.2,11.6],[1596.3,18.72,34.7]],
+  [[310.236,13.49,15.88],[1232.79,31.85,136.8],[1256.86,33.97,52.2],[1334.513,18.99,49.87],[1384.03,28.8,6.97],[1558.21,26.5,7.35],[1582.3,19.8,10.0],[1596.274,13.789,81.02]]]};
+function demoData(){
+  let seed=11;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};const gauss=()=>{let u=0,v=0;while(!u)u=rnd();while(!v)v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);};
+  const offsets=[0.9,-1.2,0.4,-0.6,1.5,-0.2];let oi=0;
+  return Object.entries(DEMO).map(([g,devs])=>{const spectra=devs.map((pk,di)=>{const off=offsets[oi++];const gH=2*pk[7][2]/(Math.PI*pk[7][1]);const sc=1000/gH;
+      const x=[];for(let v=150;v<=1800;v+=1.05)x.push(v);
+      const y=x.map(v=>{const vi=v-off;let s=380+0.18*(vi-150)+6e-5*(vi-950)**2+250*Math.exp(-(vi-150)/140);
+        for(const [p,w,a] of pk)s+=lor(vi,p,w,sc*2*a/(Math.PI*w));s+=lor(vi,520.5,4.8,420);return s+gauss()*7;});
+      if(di===1)y[900]+=700;
+      return{name:`Device #${di+1}`,x:Float64Array.from(x),y:Float64Array.from(y)};});
+    return{id:++fileSeq,name:`Simulated ${g}.csv`,group:g,power:1,time:1,spectra};});}
+
+/* ---------------- wiring ---------------- */
+loadLocal();renderPeaks();renderFiles();renderModeHelp();
+const drop=$("#drop"),fi=$("#fileInput");
+drop.addEventListener("click",()=>fi.click());drop.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fi.click();}});
+fi.addEventListener("change",()=>{if(fi.files.length)addFiles([...fi.files]);fi.value="";});
+["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over");}));
+drop.addEventListener("drop",e=>{const l=[...(e.dataTransfer?.files||[])];if(l.length)addFiles(l);});
+$("#demoBtn").addEventListener("click",()=>{files=files.concat(demoData());renderFiles();markStale();toast("Loaded 6 simulated spectra built from the published fit values");});
+$("#addPeak").addEventListener("click",()=>{peaksDef.push({name:`Peak ${peaksDef.length+1}`,pos:1000,tol:null});renderPeaks();markStale();});
+$("#resetPeaks").addEventListener("click",()=>{peaksDef=DEFAULT_PEAKS.map(p=>({...p}));ratios=DEFAULT_RATIOS.map(r=>({...r}));renderPeaks();markStale();toast("Validated model for transferred 9-AGNRs loaded");});
+$("#yumigetaPeaks").addEventListener("click",()=>{peaksDef=YUMIGETA_PEAKS.map(p=>({...p}));ratios=DEFAULT_RATIOS.map(r=>({...r}));renderPeaks();markStale();toast("8-peak model of Yumigeta et al. loaded");});
+$("#addRatio").addEventListener("click",()=>{const n=peaksDef.map(p=>p.name);ratios.push({num:n[0]||"",den:n.includes("G1")?"G1":n[n.length-1]||"",label:""});renderPeakSelects();saveLocal();if(results.length){results.ratios=ratios.map(r=>({...r}));renderAll();}});
+$("#fitMode").addEventListener("change",renderModeHelp);
+const LIVE=new Set(["normOn","normMode","showResid","ratioBasis"]);
+SETTING_IDS.forEach(id=>{if(!LIVE.has(id))$("#"+id).addEventListener("change",markStale);});
+["#normOn","#normMode","#normPeak"].forEach(s=>$(s).addEventListener("change",()=>{saveLocal();if(results.length)renderAll();}));
+$("#showResid").addEventListener("change",()=>{saveLocal();if(results.length)renderSpectrum();});
+$("#ratioBasis").addEventListener("change",()=>{saveLocal();if(results.length){results.P.ratioBasis=$("#ratioBasis").value;renderAll();}});
+$("#runBtn").addEventListener("click",runAll);
+$("#specSel").addEventListener("change",e=>{current=+e.target.value;renderSpectrum();});
+$("#prevBtn").addEventListener("click",()=>{if(!results.length)return;current=(current-1+results.length)%results.length;renderSpectrum();});
+$("#nextBtn").addEventListener("click",()=>{if(!results.length)return;current=(current+1)%results.length;renderSpectrum();});
+$("#vSingle").addEventListener("click",()=>{view="single";renderView();});
+$("#vOverlay").addEventListener("click",()=>{view="overlay";renderView();});
+$("#ovGroup").addEventListener("change",renderOverlay);$("#ovInd").addEventListener("change",renderOverlay);
+$("#cmpGroup").addEventListener("change",renderComparison);$("#cmpHeight").addEventListener("change",renderComparison);
+$("#copyCmp").addEventListener("click",()=>copyText(cmpRows().map(r=>r.join("\t")).join("\n"),"Comparison table"));
+$("#expCmp").addEventListener("click",()=>saveFile("raman_comparison_table.csv",csv(cmpRows())));
+$("#expPk").addEventListener("click",()=>saveFile("raman_peak_parameters.csv",peaksCSV()));
+$("#expRat").addEventListener("click",()=>saveFile("raman_ratios_fit_quality.csv",ratiosCSV()));
+$("#expSum").addEventListener("click",()=>saveFile("raman_group_summary.csv",summaryCSV()));
+$("#expSpec").addEventListener("click",()=>saveFile("raman_corrected_spectra.csv",spectraCSV()));
+$("#expMeth").addEventListener("click",()=>saveFile("raman_methods_settings.md",methodsMD()));
+$("#modalClose").addEventListener("click",()=>$("#modal").classList.remove("open"));
+$("#modal").addEventListener("click",e=>{if(e.target.id==="modal")$("#modal").classList.remove("open");});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")$("#modal").classList.remove("open");});
+$("#modalCopy").addEventListener("click",async()=>{const t=$("#modalText");try{await navigator.clipboard.writeText(t.value);toast("Copied");}catch(e){t.select();try{document.execCommand("copy");toast("Copied");}catch(_){toast("Select the text and copy it manually");}}});
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{if(results.length)renderView();});
+$("#appVersion").textContent=APP_VERSION;
+/* optional: when the page runs inside a Claude artifact, use its file-save capability; in a normal browser this is skipped */
+(async()=>{try{if(window.claude&&typeof window.claude.use==="function")downloads=await window.claude.use("downloads");}catch(e){downloads=null;}})();
+</script>
+</body>
+</html>
